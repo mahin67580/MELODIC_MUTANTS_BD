@@ -24,6 +24,10 @@ export default async function LessonDetailsPage({ params }) {
             )
         }
 
+        console.log(lesson);
+
+
+
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -164,33 +168,53 @@ export default async function LessonDetailsPage({ params }) {
                                 </div>
                             </div>
 
-                            {/* Rating */}
-                            <div className="flex items-center justify-center space-x-2">
-                                <div className="flex items-center">
-                                    {lesson.ratings?.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {lesson.ratings.map((r, idx) => (
-                                                <div key={idx} className="   ">
-                                                    <div className="flex items-center gap-2">
+                      
+                            {/* Rating Section */}
+                            <div className="flex flex-col items-center justify-center  ">
+                                {lesson.ratings?.length > 0 ? (
+                                    <>
+                                        {/* Average rating calculation */}
+                                        {(() => {
+                                            const avgRating =
+                                                lesson.ratings.reduce((acc, r) => acc + r.rating, 0) /
+                                                lesson.ratings.length
 
-                                                        <span className="text-yellow-400">
-                                                            {"★".repeat(r.rating)}{" "}
-                                                            <span className="text-gray-300">
-                                                                {"★".repeat(5 - r.rating)}
-                                                            </span>
+                                            const rounded = Math.round(avgRating) // round to nearest star, or use toFixed(1) for decimals
+
+                                            return (
+                                                <div className="flex items-center gap-2">
+                                                    {/* Stars */}
+                                                    <span className="text-yellow-400 text-lg">
+                                                        {"★".repeat(rounded)}
+                                                        <span className="text-gray-300">
+                                                            {"★".repeat(5 - rounded)}
                                                         </span>
-                                                    </div>
+                                                    </span>
 
+                                                    {/* Average text */}
+                                                    <span className="text-gray-700 font-medium">
+                                                        {avgRating.toFixed(0)} / 5
+                                                    </span>
 
+                                                    {/* Review count */}
+                                                    <span className="text-sm text-gray-500">
+                                                        ({lesson.ratings.length} reviews)
+                                                    </span>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-gray-500">No reviews yet.</p>
-                                    )}
-                                </div>
-                                {/* <span className="text-gray-600">({lesson.ratings?.length || 0})</span> */}
+                                            )
+                                        })()}
+                                    </>
+                                ) : (
+                                    <p className="text-gray-500">No reviews yet.</p>
+                                )}
                             </div>
+
+
+
+
+
+
+
 
                             {/* Checkout Button */}
                             <Link

@@ -1,5 +1,5 @@
 "use server"
- 
+
 import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
 import bcrypt from "bcrypt";
 
@@ -26,6 +26,7 @@ export default async function RegisterUser(payload) {
     name,
     email,
     password: hashedPassword,
+    role: "user",        // default role
     createdAt: new Date(),
   });
 

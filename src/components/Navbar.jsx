@@ -4,20 +4,57 @@ import React from 'react'
 import logo from '../../public/assets/LOGO1.svg'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
     const { data: session, status } = useSession()
-    
+
+    console.log(session, status);
+
+
+    const pathname = usePathname() // Get current path
+
+    // Function to check if a link is active
+    const isActive = (path) => {
+        return pathname === path
+    }
+
     const links = () => {
         return (
             <>
-                <Link href={'/'}><li className='btn w-30 mb-4 lg:mb-0 mr-2'>Home</li></Link>
-                <Link href={'/uploadcourse'}><li className='btn mb-4 lg:mb-0 w-30 mr-2'>Up-course</li></Link>
-                <Link href={'/mycourses'}><li className='btn mb-4 lg:mb-0 w-30 mr-2'>MY-Course</li></Link>
-                <Link href={'/my-bookings'}><li className='btn mb-4 lg:mb-0 w-30 mr-2'>My Booking</li></Link>
+                <Link href={'/'}>
+                    <li className={`btn w-30   font-bold rounded-2xl mb-4 lg:mb-0 mr-2 ${isActive('/') ? 'btn-primary' : ''}`}>
+                        Home
+                    </li>
+                </Link>
+                <Link href={'/uploadcourse'}>
+                    <li className={`btn mb-4   font-bold  rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/uploadcourse') ? 'btn-primary' : ''}`}>
+                        Up-course
+                    </li>
+                </Link>
+                <Link href={'/about'}>
+                    <li className={`btn mb-4   font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/about') ? 'btn-primary' : ''}`}>
+                        About
+                    </li>
+                </Link>
+                <Link href={'/contact'}>
+                    <li className={`btn mb-4    font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/contact') ? 'btn-primary' : ''}`}>
+                        Contact
+                    </li>
+                </Link>
+                <Link href={'/allcourses'}>
+                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
+                        All-Courses
+                    </li>
+                </Link>
+                {/* <a href="#comment" className={`btn mb-4 lg:mb-0 w-30 mr-2 ${pathname === '/' ? 'btn-primary' : ''}`}>
+                    Reviews
+                </a> */}
             </>
         )
     }
+
+
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: '/' })
@@ -27,21 +64,21 @@ export default function Navbar() {
     const userHasImage = session?.user?.image
 
     return (
-        <div className="navbar bg-base-100 shadow-sm z-10 top-0 sticky">
+        <div className="navbar   backdrop-blur-2xl z-10 top-0 sticky">
             <div className="navbar-start">
                 <div className="dropdown">
                     <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"> 
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /> 
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
                         </svg>
                     </div>
                     <ul
                         tabIndex={0}
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow">
-                        {links()}                     
+                        {links()}
                     </ul>
                 </div>
-                <Link href={'/'}>  
+                <Link href={'/'}>
                     <Image
                         src={logo}
                         width={50}
@@ -52,11 +89,15 @@ export default function Navbar() {
                 </Link>
             </div>
             {/* desktop view */}
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    {links()}
-                </ul>
+
+            <div className='   w-full flex justify-center '>
+                <div className="navbar-center   top-2  lg:flex absolute  flex justify-center hidden    ">
+                    <ul className="menu menu-horizontal bg-base-100 rounded-2xl border-2 px-10  py-5        ">
+                        {links()}
+                    </ul>
+                </div>
             </div>
+
             <div className="navbar-end">
                 {status === 'loading' ? (
                     // Loading state
@@ -66,10 +107,10 @@ export default function Navbar() {
                 ) : status === 'authenticated' ? (
                     // User is logged in - show profile dropdown
                     <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                        <div tabIndex={0} role="button" className="btn w-full   btn-ghost btn-circle avatar ">
                             {userHasImage ? (
                                 // Show user's profile image if available
-                                <div className="w-10 rounded-full border-2 border-black">
+                                <div className="border-2 border-black  rounded-full ">
                                     <Image
                                         src={session.user.image}
                                         width={40}
@@ -85,8 +126,8 @@ export default function Navbar() {
                                     {/* Fallback initial - hidden by default */}
                                     <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black hidden">
                                         <span className="text-sm font-bold">
-                                            {session?.user?.name?.charAt(0).toUpperCase() || 
-                                             session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                                            {session?.user?.name?.charAt(0).toUpperCase() ||
+                                                session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                                         </span>
                                     </div>
                                 </div>
@@ -94,22 +135,22 @@ export default function Navbar() {
                                 // Show initial if no image available
                                 <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black">
                                     <span className="text-sm font-bold">
-                                        {session?.user?.name?.charAt(0).toUpperCase() || 
-                                         session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                                        {session?.user?.name?.charAt(0).toUpperCase() ||
+                                            session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                                     </span>
                                 </div>
                             )}
                         </div>
-                        <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                            <li className="px-4 py-2 border-b">
+                        <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-base-100 rounded-box w-52">
+                            <li className="  py-2 border-b">
                                 <div className="font-medium truncate">{session?.user?.name}</div>
                                 <div className="text-xs text-gray-500 truncate">{session?.user?.email}</div>
                             </li>
                             <li><Link href="/profile">Profile</Link></li>
-                            <li><Link href="/dashboard">Dashboard</Link></li>
+                            <li><Link href="/dashboard/userdashboard/anlytics">Dashboard</Link></li>
                             <li><Link href="/settings">Settings</Link></li>
                             <li className="border-t mt-2">
-                                <button 
+                                <button
                                     onClick={handleSignOut}
                                     className="btn btn-ghost btn-sm w-full justify-start"
                                 >

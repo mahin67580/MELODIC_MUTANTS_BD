@@ -27,11 +27,11 @@ export default function MyBookingsPage() {
 
 
 
-    const handleEdit = (id) => {
-        // Implement edit functionality
-        console.log('Edit booking with id:', id)
-        alert(`Edit functionality for booking ${id} would be implemented here`)
-    }
+    // const handleEdit = (id) => {
+        
+    //     console.log('Edit booking with id:', id)
+    //     alert(`Edit functionality for booking ${id} would be implemented here`)
+    // }
 
     const handleDelete = async (id) => {
         const result = await Swal.fire({
@@ -122,7 +122,7 @@ export default function MyBookingsPage() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div className="flex space-x-2">
-                                                        <Link href={`/my-bookings/${booking._id}`}>
+                                                        <Link href={`/dashboard/userdashboard/mybookings/${booking._id}`}>
                                                             <button
                                                                 className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md text-xs font-medium"
                                                             >

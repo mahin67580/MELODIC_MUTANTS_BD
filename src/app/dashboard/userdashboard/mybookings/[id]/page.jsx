@@ -90,7 +90,7 @@ export default function BookingUpdateForm({ params }) {
                 })
 
                 // Redirect after user clicks "OK"
-                router.push('/my-bookings')
+                router.push('/dashboard/userdashboard/mybookings')
             } else {
                 throw new Error(result.message || "Update failed")
             }

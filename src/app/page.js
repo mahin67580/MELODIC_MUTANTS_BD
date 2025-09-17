@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Lessons from "./components/Lessons";
 import Comment from "./components/Comment";
+import Hero from "./components/Hero";
 
 
 export default function Home() {
@@ -9,6 +10,7 @@ export default function Home() {
       {/* <h1 className="text-3xl font-bold underline">
         Hello world!
       </h1> */}
+      <Hero></Hero>
       <Lessons></Lessons>
       <Comment></Comment>
 

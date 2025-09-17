@@ -129,7 +129,7 @@ export default function UploadCoursePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="  mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Upload New Course</h1>
       <form
         onSubmit={handleSubmit}
