@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import NextAuthProvider from "@/providers/NextAuthProvider";
+import ClientLayout from "./ClientLayout"; // ✅ নতুন client component import করো
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +21,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NextAuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </NextAuthProvider>
       </body>
     </html>
   );
