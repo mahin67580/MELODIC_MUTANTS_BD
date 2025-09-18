@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-
+import Swal from "sweetalert2";
 export default function UploadCoursePage() {
   const [form, setForm] = useState({
     title: "",
@@ -23,6 +23,7 @@ export default function UploadCoursePage() {
   const [resourceUrl, setResourceUrl] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false); // image uploading
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
@@ -38,9 +39,9 @@ export default function UploadCoursePage() {
 
   const addResource = () => {
     if (resourceName.trim() && resourceUrl.trim()) {
-      setResources([...resources, { 
-        name: resourceName.trim(), 
-        url: resourceUrl.trim() 
+      setResources([...resources, {
+        name: resourceName.trim(),
+        url: resourceUrl.trim()
       }]);
       setResourceName("");
       setResourceUrl("");
@@ -55,6 +56,9 @@ export default function UploadCoursePage() {
     formData.append("file", file);
 
     try {
+      setUploading(true);
+      setMessage("Uploading image...");
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -69,6 +73,8 @@ export default function UploadCoursePage() {
     } catch (err) {
       console.error(err);
       setMessage("❌ Upload error");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -103,7 +109,6 @@ export default function UploadCoursePage() {
 
       const data = await res.json();
       if (data.success) {
-        setMessage("✅ Course uploaded successfully!");
         setForm({
           title: "",
           instrument: "",
@@ -118,11 +123,26 @@ export default function UploadCoursePage() {
         });
         setSyllabus([]);
         setResources([]);
+
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Course uploaded successfully 🎉",
+          confirmButtonColor: "#3085d6",
+        });
       } else {
-        setMessage("❌ " + (data.error || "Something went wrong"));
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: data.error || "Something went wrong",
+        });
       }
     } catch (err) {
-      setMessage("❌ Error uploading course");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error uploading course",
+      });
     } finally {
       setLoading(false);
     }
@@ -196,24 +216,51 @@ export default function UploadCoursePage() {
 
         {/* Thumbnail Upload */}
         <div>
-          <label className="block font-medium mb-1">Course Image</label>
+          <label className="block font-medium mb-1">Course Thumbnail</label>
           <label className="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded-lg inline-block hover:bg-blue-700 transition-colors">
-            Choose Image
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageUpload} 
-              className="hidden" 
+            {uploading ? "Uploading..." : "Upload Image"}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              disabled={uploading}
             />
           </label>
-          {form.thumbnail && (
+
+          {uploading && (
+            <div className="mt-2 text-blue-600 flex items-center gap-2">
+              <svg
+                className="animate-spin h-5 w-5 text-blue-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span>Uploading image...</span>
+            </div>
+          )}
+          {/* /form.thumbnail */}
+          {form.thumbnail && !uploading && (
             <div className="mt-2">
               <img
                 src={form.thumbnail}
                 alt="Course thumbnail"
-                className="w-40 h-40 object-cover rounded-lg shadow"
+                className="w-32 h-32 object-cover rounded-lg shadow"
               />
-              <p className="text-sm text-green-600 mt-1">Image uploaded successfully!</p>
             </div>
           )}
         </div>
@@ -313,8 +360,11 @@ export default function UploadCoursePage() {
         {/* Submit */}
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          disabled={loading || uploading}
+          className={`w-full py-2 rounded-lg transition ${loading || uploading
+            ? "bg-gray-400 cursor-not-allowed"
+            : " bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            }`}
         >
           {loading ? "Uploading..." : "Upload Course"}
         </button>

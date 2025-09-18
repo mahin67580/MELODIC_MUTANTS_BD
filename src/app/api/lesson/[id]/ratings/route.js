@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 
 export async function POST(req, { params }) {
   try {
@@ -15,7 +15,7 @@ export async function POST(req, { params }) {
       );
     }
 
-    const lessonCollection = dbConnect(collectionNamesObj.lessonCollection);
+    const lessonCollection =await dbConnect(collectionNamesObj.lessonCollection);
 
     const result = await lessonCollection.updateOne(
       { _id: new ObjectId(id) },

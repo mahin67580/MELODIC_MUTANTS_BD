@@ -7,9 +7,13 @@ import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
+
+
     const { data: session, status } = useSession()
 
-    console.log(session, status);
+
+
+    //console.log(session, status);
 
 
     const pathname = usePathname() // Get current path
@@ -27,11 +31,11 @@ export default function Navbar() {
                         Home
                     </li>
                 </Link>
-                <Link href={'/uploadcourse'}>
+                {/* <Link href={'/uploadcourse'}>
                     <li className={`btn mb-4   font-bold  rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/uploadcourse') ? 'btn-primary' : ''}`}>
                         Up-course
                     </li>
-                </Link>
+                </Link> */}
                 <Link href={'/about'}>
                     <li className={`btn mb-4   font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/about') ? 'btn-primary' : ''}`}>
                         About
@@ -45,6 +49,11 @@ export default function Navbar() {
                 <Link href={'/allcourses'}>
                     <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
                         All-Courses
+                    </li>
+                </Link>
+                <Link href={'/allcourses'}>
+                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
+                        Instructors  
                     </li>
                 </Link>
                 {/* <a href="#comment" className={`btn mb-4 lg:mb-0 w-30 mr-2 ${pathname === '/' ? 'btn-primary' : ''}`}>
@@ -147,8 +156,15 @@ export default function Navbar() {
                                 <div className="text-xs text-gray-500 truncate">{session?.user?.email}</div>
                             </li>
                             <li><Link href="/profile">Profile</Link></li>
-                            <li><Link href="/dashboard/userdashboard/anlytics">Dashboard</Link></li>
-                            <li><Link href="/settings">Settings</Link></li>
+
+                            {/* ✅ Role-based Dashboard */}
+                            {session?.user?.role === "admin" ? (
+                                <li><Link href="/dashboard/admindashboard/anlytics">Dashboard</Link></li>
+                            ) : (
+                                <li><Link href="/dashboard/userdashboard/anlytics">Dashboard</Link></li>
+                            )}
+
+                            <li><Link href="/instructorregister">Instructor Registration</Link></li>
                             <li className="border-t mt-2">
                                 <button
                                     onClick={handleSignOut}

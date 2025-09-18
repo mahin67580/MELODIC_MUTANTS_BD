@@ -1,6 +1,6 @@
 // pages/api/my-bookings/[id].js
 import { authOptions } from "@/lib/authOptions";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -14,7 +14,7 @@ export const GET = async (req, { params }) => {
     const userEmail = session.user.email;
 
     const { id } =await params;
-    const bookingCollection = dbConnect(collectionNamesObj.bookingCollection);
+    const bookingCollection =await dbConnect(collectionNamesObj.bookingCollection);
 
     const booking = await bookingCollection.findOne({ _id: new ObjectId(id) });
 
@@ -43,7 +43,7 @@ export const PATCH = async (req, { params }) => {
 
     const { id } =await params;
     const body = await req.json();
-    const bookingCollection = dbConnect(collectionNamesObj.bookingCollection);
+    const bookingCollection = await dbConnect(collectionNamesObj.bookingCollection);
 
     const booking = await bookingCollection.findOne({ _id: new ObjectId(id) });
 

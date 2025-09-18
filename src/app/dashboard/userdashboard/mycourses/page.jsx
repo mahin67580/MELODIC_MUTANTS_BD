@@ -19,7 +19,7 @@ export default function MyCoursesPage() {
     const fetchMyCourses = async () => {
         try {
             setLoading(true)
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/mycourses`)
+            const res = await fetch(`/api/mycourses`)
             if (!res.ok) {
                 throw new Error('Failed to fetch courses')
             }

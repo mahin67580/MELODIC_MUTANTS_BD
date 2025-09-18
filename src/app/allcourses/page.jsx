@@ -1,12 +1,10 @@
  
  
- 
- 
 import AllCoursesClient from "../components/AllCoursesClient";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 
 export default async function AllCoursesPage() {
-  const lessonCollection = dbConnect(collectionNamesObj.lessonCollection);
+  const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
   const data = await lessonCollection.find({}).toArray();
 
   // Convert MongoDB _id to string (for React keys)

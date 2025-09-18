@@ -26,7 +26,7 @@ export default function BookingUpdateForm({ params }) {
         const fetchLesson = async () => {
             try {
                 const { id } = await params
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/my-bookings/${id}`, { cache: "no-store" })
+                const res = await fetch(`/api/my-bookings/${id}`, { cache: "no-store" })
                 const data = await res.json()
 
                 setLesson(data)
@@ -68,7 +68,7 @@ export default function BookingUpdateForm({ params }) {
         setIsLoading(true)
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/my-bookings/${formData.id}`, {
+            const res = await fetch(`/api/my-bookings/${formData.id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phone: formData.phone, paymentMethod: formData.paymentMethod }),

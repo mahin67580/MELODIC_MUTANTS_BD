@@ -1,12 +1,13 @@
 import { FaArrowRightToBracket } from "react-icons/fa6";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+ 
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Star } from "lucide-react";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 
 export default async function Lessons() {
-  const lessonCollection = dbConnect(collectionNamesObj.lessonCollection);
+  const lessonCollection = await  dbConnect(collectionNamesObj.lessonCollection);
   const data = await lessonCollection.find({}).limit(6).toArray();
 
   // Compute Average Rating

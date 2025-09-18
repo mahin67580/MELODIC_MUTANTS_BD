@@ -1,4 +1,4 @@
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -13,7 +13,7 @@ export async function POST(req) {
       );
     }
 
-    const lessonCollection = dbConnect(collectionNamesObj.lessonCollection);
+    const lessonCollection =await dbConnect(collectionNamesObj.lessonCollection);
 
     const newCourse = {
       title: body.title,
@@ -52,7 +52,7 @@ export async function POST(req) {
 
 export async function GET() {
   try {
-    const lessonCollection = dbConnect(collectionNamesObj.lessonCollection);
+    const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
     const courses = await lessonCollection.find({}).toArray();
 
     return NextResponse.json({ success: true, data: courses });

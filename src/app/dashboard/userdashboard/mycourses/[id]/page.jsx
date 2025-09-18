@@ -3,14 +3,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { authOptions } from '@/lib/authOptions'
 import { getServerSession } from 'next-auth'
-import dbConnect, { collectionNamesObj } from '@/lib/dbconnect'
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 import { ObjectId } from 'mongodb'
 import { RatingForm } from '@/components/forms/RatingForm'
 
 async function getCourseData(courseId, userEmail) {
     try {
-        const bookingCollection = dbConnect(collectionNamesObj.bookingCollection)
-        const lessonCollection = dbConnect(collectionNamesObj.lessonCollection)
+        const bookingCollection =await dbConnect(collectionNamesObj.bookingCollection)
+        const lessonCollection =await dbConnect(collectionNamesObj.lessonCollection)
 
         // Check if user has purchased this course - use the "id" field
         const booking = await bookingCollection.findOne({

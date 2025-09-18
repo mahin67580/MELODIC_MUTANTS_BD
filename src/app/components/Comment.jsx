@@ -1,8 +1,9 @@
-import dbConnect, { collectionNamesObj } from '@/lib/dbconnect'
+ 
+import { collectionNamesObj, dbConnect } from '@/lib/dbconnect'
 import CommentSlider from './CommentSlider'
 
 export default async function Comment() {
-  const lessonCollection = dbConnect(collectionNamesObj.lessonCollection)
+  const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection)
   const data = await lessonCollection.find({}).toArray()
 
   const allRatings = data.flatMap(lesson => 

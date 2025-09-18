@@ -30,7 +30,7 @@ export default function CheckoutPage({ params }) {
     const fetchLesson = async () => {
       const { id } = await params
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson/${id}`,
+        `/api/lesson/${id}`,
         { cache: "no-store" }
       )
       const data = await res.json()
@@ -61,7 +61,7 @@ export default function CheckoutPage({ params }) {
     const checkBooking = async () => {
       if (status === "authenticated" && lesson?._id) {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson?lessonId=${lesson._id}`,
+          `/api/lesson?lessonId=${lesson._id}`,
           { cache: "no-store" }
         );
         const data = await res.json();
@@ -88,7 +88,7 @@ export default function CheckoutPage({ params }) {
     try {
       // 1️⃣ First, save enrollment details (POST)
       const postRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson`,
+        `/api/lesson`,
         {
           method: "POST",
           headers: {
@@ -104,12 +104,13 @@ export default function CheckoutPage({ params }) {
 
       // 2️⃣ Then, increment enrolledStudents (PATCH)
       const patchRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/courses/${formData.id}`,
+        `/api/courses/${formData.id}`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ enroll: true }), // ✅ tell API to increment enrolledStudents
         }
       )
 
@@ -127,8 +128,8 @@ export default function CheckoutPage({ params }) {
       })
 
       // 👇 Redirect to My Courses
-      router.push("/mycourses")
-      
+      router.push("/dashboard/userdashboard/mycourses")
+
       // Reset form if needed
       setFormData(prev => ({
         ...prev,

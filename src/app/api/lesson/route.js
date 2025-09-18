@@ -1,6 +1,6 @@
-
 import { authOptions } from "@/lib/authOptions";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
+ 
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server"
 
@@ -12,7 +12,7 @@ export const GET = async (req) => {
         const { searchParams } = new URL(req.url);
         const lessonId = searchParams.get("lessonId");
 
-        const bookingCollection = dbConnect(collectionNamesObj.bookingCollection);
+        const bookingCollection =await dbConnect(collectionNamesObj.bookingCollection);
 
         let query = { email };
         if (lessonId) {
@@ -29,7 +29,7 @@ export const GET = async (req) => {
 
 export const POST = async (req) => {
     const body = await req.json();
-    const bookingCollection = dbConnect(collectionNamesObj.bookingCollection);
+    const bookingCollection = await dbConnect(collectionNamesObj.bookingCollection);
 
     // Prevent duplicate booking
     const exists = await bookingCollection.findOne({

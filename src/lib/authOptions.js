@@ -1,7 +1,8 @@
 import loginUser from "@/app/actions/auth/loginUser";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import dbConnect, { collectionNamesObj } from "./dbconnect";
+import { collectionNamesObj, dbConnect } from "./dbconnect";
+ 
 
 export const authOptions = {
   providers: [
@@ -13,7 +14,7 @@ export const authOptions = {
       },
       async authorize(credentials) {
         const user = await loginUser(credentials);
-        // ✅ loginUser should return { id, name, email, role }
+        //  loginUser should return { id, name, email, role }
         return user || null;
       }
     }),
@@ -31,7 +32,7 @@ export const authOptions = {
         const { providerAccountId, provider } = account;
         const { email, image, name } = user;
 
-        const userCollection = dbConnect(collectionNamesObj.userCollection);
+        const userCollection = await dbConnect(collectionNamesObj.userCollection);
         const isExisted = await userCollection.findOne({ providerAccountId });
 
         if (!isExisted) {

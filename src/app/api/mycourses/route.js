@@ -1,8 +1,8 @@
 import { authOptions } from "@/lib/authOptions";
-import dbConnect, { collectionNamesObj } from "@/lib/dbconnect";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
+import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 
 export const GET = async (req) => {
     try {
@@ -13,8 +13,8 @@ export const GET = async (req) => {
         }
 
         const email = session.user.email
-        const bookingCollection = dbConnect(collectionNamesObj.bookingCollection)
-        const lessonCollection = dbConnect(collectionNamesObj.lessonCollection)
+        const bookingCollection = await dbConnect(collectionNamesObj.bookingCollection)
+        const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection)
         
         // Get user's bookings
         const bookings = await bookingCollection.find({ email }).toArray()

@@ -15,7 +15,7 @@ export default function MyBookingsPage() {
     const fetchBookings = async () => {
         try {
             setLoading(true)
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson`)
+            const res = await fetch(`/api/lesson`)
             const bookings = await res.json()
             setData(bookings)
         } catch (error) {
@@ -46,7 +46,7 @@ export default function MyBookingsPage() {
 
         if (result.isConfirmed) {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson/${id}`, {
+                const res = await fetch(`/api/lesson/${id}`, {
                     method: 'DELETE',
                 })
 

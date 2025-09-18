@@ -31,8 +31,8 @@ export default function AnalyticsPage() {
       
       // Fetch courses and bookings in parallel
       const [coursesRes, bookingsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/mycourses`),
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson`)
+        fetch(`/api/mycourses`),
+        fetch(`/api/lesson`)
       ])
 
       if (!coursesRes.ok || !bookingsRes.ok) {
