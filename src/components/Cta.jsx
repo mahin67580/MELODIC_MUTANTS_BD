@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Cta() {
     return (
-        <div>  <section className="py-16 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+        <div>  <section className="py-16 px-4   ">
             <div className="container mx-auto max-w-4xl text-center">
                 <h2 className="text-3xl font-bold mb-6">Ready to Start Your Musical Journey?</h2>
                 <p className="text-xl mb-8 max-w-2xl mx-auto">

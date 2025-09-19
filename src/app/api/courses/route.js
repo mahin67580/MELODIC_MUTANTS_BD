@@ -1,7 +1,12 @@
+import { authOptions } from "@/lib/authOptions";
 import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
+
+  const session = await getServerSession(authOptions);
+
   try {
     const body = await req.json();
 
@@ -16,6 +21,7 @@ export async function POST(req) {
     const lessonCollection =await dbConnect(collectionNamesObj.lessonCollection);
 
     const newCourse = {
+      email: session?.user?.email || "unknown",
       title: body.title,
       instrument: body.instrument,
       level: body.level || "beginner",

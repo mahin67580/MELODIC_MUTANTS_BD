@@ -14,12 +14,12 @@ export default function CommentSlider({ ratings }) {
   }
 
   return (
-    <div id="comment" className=" w-full py-12 bg-gray-50 relative overflow-hidden">
+    <div id="comment" className=" w-full py-12    relative overflow-hidden">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Student Reviews</h2>
 
         {/* Slider Container */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center  ">
           {/* Left Arrow */}
           <button 
             onClick={prev} 
@@ -30,15 +30,15 @@ export default function CommentSlider({ ratings }) {
           </button>
 
           {/* Slider Track */}
-          <div className="flex overflow-hidden w-full">
+          <div className="flex overflow-hidden w-full ">
             <div 
-              className="flex transition-transform duration-500 ease-in-out gap-6"
+              className="flex  transition-transform duration-500 ease-in-out gap-6"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
               {ratings.map((rating, index) => (
                 <div 
                   key={index} 
-                  className="min-w-full md:min-w-[50%] lg:min-w-[33.3%] bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition"
+                  className="min-w-full border-2  md:min-w-[50%] lg:min-w-[20%]   rounded-xl shadow-md p-6 hover:shadow-lg transition"
                 >
                   <div className="flex items-center mb-4">
                     <div className="flex text-yellow-400 mr-2">
@@ -49,17 +49,17 @@ export default function CommentSlider({ ratings }) {
                         />
                       ))}
                     </div>
-                    <span className="text-gray-500 text-sm">
+                    <span className="text-sm">
                       {new Date(rating.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-gray-700 mb-4">"{rating.review}"</p>
+                  <p className="  mb-4">"{rating.review}"</p>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center font-medium text-gray-900 gap-1">
-                      <FaUserCircle className="text-gray-500 text-lg" />
+                      <FaUserCircle className="  text-lg" />
                       {rating.user}
                     </span>
-                    <span className="text-sm text-blue-600 truncate max-w-[150px]">{rating.lessonTitle}</span>
+                    <span className="text-sm   truncate max-w-[150px]">{rating.lessonTitle}</span>
                   </div>
                 </div>
               ))}

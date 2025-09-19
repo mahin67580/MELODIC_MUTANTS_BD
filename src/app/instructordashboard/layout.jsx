@@ -1,15 +1,9 @@
-import Adminnav from '@/components/Adminnav'
-import Dashnav from '@/components/Dashnav'
+
+import Instructornav from '@/components/Instructornav'
 import { BarChart3 } from 'lucide-react'
 import Link from 'next/link'
-import { getServerSession } from "next-auth"
-import { authOptions } from '@/lib/authOptions'
-
 
 export default async function Layout({ children }) {
-
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role || "user"; // fallback
 
   return (
     <div className="grid grid-cols-12">
@@ -21,8 +15,8 @@ export default async function Layout({ children }) {
           </div>
         </Link>
 
-        {role === "admin" ? <Adminnav /> : <Dashnav />}
-   
+       <Instructornav />
+       
       </div>
       <div className="col-span-10">
        

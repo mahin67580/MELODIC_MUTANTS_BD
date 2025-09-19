@@ -16,7 +16,7 @@ export default async function Comment() {
 
   if (allRatings.length === 0) {
     return (
-      <div className="w-full py-12 bg-gray-50 flex justify-center items-center">
+      <div className="w-full py-12  flex justify-center items-center">
         <p className="text-gray-500">No reviews yet.</p>
       </div>
     )

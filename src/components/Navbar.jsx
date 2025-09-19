@@ -1,20 +1,16 @@
 "use client"
 import Image from 'next/image'
-import React from 'react'
 import logo from '../../public/assets/LOGO1.svg'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 
-export default function Navbar() {
+export default function Navbar({ isInstructor }) {
 
 
     const { data: session, status } = useSession()
 
-
-
     //console.log(session, status);
-
 
     const pathname = usePathname() // Get current path
 
@@ -53,7 +49,7 @@ export default function Navbar() {
                 </Link>
                 <Link href={'/allcourses'}>
                     <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
-                        Instructors  
+                        Instructors
                     </li>
                 </Link>
                 {/* <a href="#comment" className={`btn mb-4 lg:mb-0 w-30 mr-2 ${pathname === '/' ? 'btn-primary' : ''}`}>
@@ -164,7 +160,13 @@ export default function Navbar() {
                                 <li><Link href="/dashboard/userdashboard/anlytics">Dashboard</Link></li>
                             )}
 
-                            <li><Link href="/instructorregister">Instructor Registration</Link></li>
+                            {/* ✅ Instructor logic */}
+                            {isInstructor ? (
+                                <li><Link href="/instructordashboard/addcourse">Instructor Dashboard</Link></li>
+                            ) : (
+                                <li><Link href="/instructorregister">Instructor Registration</Link></li>
+                            )}
+
                             <li className="border-t mt-2">
                                 <button
                                     onClick={handleSignOut}

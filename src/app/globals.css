@@ -1,6 +1,10 @@
 @import "tailwindcss";
-
 @plugin "daisyui" {
   themes: light --default;
-  
 }
+
+/* body {
+  @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white;
+} */
+
+/* //bg-gradient-to-r from-purple-900 to-blue-800 */
