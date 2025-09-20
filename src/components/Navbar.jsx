@@ -47,8 +47,8 @@ export default function Navbar({ isInstructor }) {
                         All-Courses
                     </li>
                 </Link>
-                <Link href={'/allcourses'}>
-                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
+                <Link href={'/instructors'}>
+                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/instructors') ? 'btn-primary' : ''}`}>
                         Instructors
                     </li>
                 </Link>
