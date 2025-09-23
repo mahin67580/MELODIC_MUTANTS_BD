@@ -1,5 +1,5 @@
 import { FaArrowRightToBracket } from "react-icons/fa6";
- 
+
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -7,8 +7,12 @@ import { Star } from "lucide-react";
 import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 
 export default async function Lessons() {
-  const lessonCollection = await  dbConnect(collectionNamesObj.lessonCollection);
-  const data = await lessonCollection.find({}).limit(6).toArray();
+  const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
+  const data = await lessonCollection
+    .find({})
+    .sort({ enrolledStudents: -1 }) // Sort by enrolledStudents in descending order
+    .limit(6) // Get top 6 most enrolled
+    .toArray();
 
   // Compute Average Rating
   const getAverageRating = (ratings) => {
@@ -19,7 +23,7 @@ export default async function Lessons() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Available Lessons</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">Featured Lessons</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {data.map((lesson) => {
           const avgRating = getAverageRating(lesson.ratings);

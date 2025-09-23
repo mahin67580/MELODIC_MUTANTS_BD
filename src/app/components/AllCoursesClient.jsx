@@ -7,6 +7,29 @@ export default function AllCoursesClient({ courses }) {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("All");
 
+    // Instrument options (matching the previous code)
+    const instrumentOptions = [
+        "Acoustic Guitar",
+        "Electric Guitar",
+        "Classical Guitar",
+        "Bass Guitar",
+        "Piano / Keyboard",
+        "Drums / Percussion",
+        "Violin",
+        "Cello",
+        "Flute",
+        "Saxophone",
+        "Clarinet",
+        "Trumpet",
+        "Trombone",
+        "Vocals (Singing)",
+        "Ukulele",
+        "Harmonica",
+        "Banjo",
+        "Tabla / Hand Drums",
+        "Digital Music Production"
+    ];
+
     // Filter & Search Logic
     const filteredCourses = courses.filter((course) => {
         const matchesSearch = course.title
@@ -49,10 +72,11 @@ export default function AllCoursesClient({ courses }) {
                         onChange={(e) => setFilter(e.target.value)}
                     >
                         <option value="All">All Instruments</option>
-                        <option value="Electric Guitar">Electric Guitar</option>
-                        <option value="Acoustic Guitar">Acoustic Guitar</option>
-                        <option value="Piano">Piano</option>
-                        <option value="Violin">Violin</option>
+                        {instrumentOptions.map((instrument, index) => (
+                            <option key={index} value={instrument}>
+                                {instrument}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </div>

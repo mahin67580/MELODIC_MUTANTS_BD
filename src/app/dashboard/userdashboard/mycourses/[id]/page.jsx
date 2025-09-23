@@ -1,87 +1,100 @@
-import React from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { authOptions } from '@/lib/authOptions'
-import { getServerSession } from 'next-auth'
+
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { authOptions } from "@/lib/authOptions";
+import { getServerSession } from "next-auth";
 import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
-import { ObjectId } from 'mongodb'
-import { RatingForm } from '@/components/forms/RatingForm'
+import { ObjectId } from "mongodb";
+import { RatingForm } from "@/components/forms/RatingForm";
+import VideoPlayer from "../component/VideoPlayer";
 
 async function getCourseData(courseId, userEmail) {
     try {
-        const bookingCollection =await dbConnect(collectionNamesObj.bookingCollection)
-        const lessonCollection =await dbConnect(collectionNamesObj.lessonCollection)
+        const bookingCollection = await dbConnect(
+            collectionNamesObj.bookingCollection
+        );
+        const lessonCollection = await dbConnect(
+            collectionNamesObj.lessonCollection
+        );
 
-        // Check if user has purchased this course - use the "id" field
+        // Check if user has purchased this course
         const booking = await bookingCollection.findOne({
             email: userEmail,
-            id: courseId
-        })
+            id: courseId,
+        });
 
         if (!booking) {
-            return null
+            return null;
         }
 
         // Convert courseId to ObjectId for querying lessons collection
         let objectId;
         try {
-            objectId = new ObjectId(courseId)
+            objectId = new ObjectId(courseId);
         } catch (error) {
-            console.error('Invalid course ID:', courseId)
-            return null
+            console.error("Invalid course ID:", courseId);
+            return null;
         }
 
         // Get course details
-        const course = await lessonCollection.findOne({ _id: objectId })
+        const course = await lessonCollection.findOne({ _id: objectId });
 
         if (!course) {
-            return null
+            return null;
         }
 
-        return course
+        return course;
     } catch (error) {
-        console.error('Error fetching course data:', error)
-        return null
+        console.error("Error fetching course data:", error);
+        return null;
     }
 }
 
 export default async function CourseDetailPage({ params }) {
-    const session = await getServerSession(authOptions)
-    const { id } = await params
+    const session = await getServerSession(authOptions);
+    const { id } = await params;
 
     if (!session) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-800">Please sign in to view this course</h1>
-                    <Link href="/login" className="text-blue-600 hover:underline mt-4 inline-block">
+                    <h1 className="text-2xl font-bold text-gray-800">
+                        Please sign in to view this course
+                    </h1>
+                    <Link
+                        href="/login"
+                        className="text-blue-600 hover:underline mt-4 inline-block"
+                    >
                         Sign In
                     </Link>
                 </div>
             </div>
-        )
+        );
     }
 
-    const course = await getCourseData(id, session.user.email)
+    const course = await getCourseData(id, session.user.email);
+
+    console.log(course);
 
     if (!course) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-gray-800">Course not found</h1>
-                    <p className="text-gray-600 mt-2">You may not have purchased this course</p>
-                    <Link href="/lessons" className="text-blue-600 hover:underline mt-4 inline-block">
+                    <p className="text-gray-600 mt-2">
+                        You may not have purchased this course
+                    </p>
+                    <Link
+                        href="/lessons"
+                        className="text-blue-600 hover:underline mt-4 inline-block"
+                    >
                         Browse Courses
                     </Link>
                 </div>
             </div>
-        )
+        );
     }
-
-
-
-
-
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -90,7 +103,10 @@ export default async function CourseDetailPage({ params }) {
                 <nav className="flex mb-6" aria-label="Breadcrumb">
                     <ol className="inline-flex items-center space-x-1 md:space-x-3">
                         <li className="inline-flex items-center">
-                            <Link href="/mycourses" className="text-gray-700 hover:text-blue-600">
+                            <Link
+                                href="/mycourses"
+                                className="text-gray-700 hover:text-blue-600"
+                            >
                                 My Courses
                             </Link>
                         </li>
@@ -109,7 +125,7 @@ export default async function CourseDetailPage({ params }) {
                         <div className="lg:w-1/3">
                             <div className="relative w-full h-64 rounded-lg overflow-hidden">
                                 <Image
-                                    src={course.thumbnail || '/placeholder-course.jpg'}
+                                    src={course.thumbnail || "/placeholder-course.jpg"}
                                     alt={course.title}
                                     fill
                                     className="object-cover"
@@ -118,8 +134,12 @@ export default async function CourseDetailPage({ params }) {
                         </div>
 
                         <div className="lg:w-2/3">
-                            <h1 className="text-3xl font-bold text-gray-800 mb-4">{course.title}</h1>
-                            <p className="text-gray-600 mb-4">by {course.instructor?.name || 'Unknown Instructor'}</p>
+                            <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                                {course.title}
+                            </h1>
+                            <p className="text-gray-600 mb-4">
+                                by {course.instructor?.name || "Unknown Instructor"}
+                            </p>
 
                             <div className="flex flex-wrap gap-4 mb-6">
                                 <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
@@ -128,37 +148,17 @@ export default async function CourseDetailPage({ params }) {
                                 <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                                     {course.category}
                                 </div>
-                                {/* <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                                    {course.duration} minutes
-                                </div> */}
                             </div>
 
-                            {/* <div className="flex items-center mb-6">
-                                <div className="flex items-center mr-4">
-                                    {Array.from({ length: 5 }, (_, i) => (
-                                        <span
-                                            key={i}
-                                            className={`text-lg ${
-                                                i < Math.floor(course.rating || 0)
-                                                    ? 'text-yellow-400'
-                                                    : 'text-gray-300'
-                                            }`}
-                                        >
-                                            ⭐
-                                        </span>
-                                    ))}
-                                    <span className="ml-2 text-gray-600">({course.rating || 0})</span>
-                                </div>
-                                <span className="text-gray-600">
-                                    {course.studentsEnrolled || 0} students enrolled
-                                </span>
-                            </div> */}
-
                             <div className="bg-blue-50 rounded-lg p-4">
-                                <h3 className="font-semibold text-blue-800 mb-2">What you'll learn</h3>
-                                <ul className="  flex justify-evenly flex-wrap">
+                                <h3 className="font-semibold text-blue-800 mb-2">
+                                    What you'll learn
+                                </h3>
+                                <ul className="flex justify-evenly flex-wrap">
                                     {course.syllabus?.map((item, index) => (
-                                        <li className='btn' key={index}>{item}</li>
+                                        <li className="btn" key={index}>
+                                            {item}
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
@@ -173,26 +173,24 @@ export default async function CourseDetailPage({ params }) {
                         {/* Video Player */}
                         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                             <h2 className="text-xl font-bold mb-4">Course Content</h2>
-                            <div className="aspect-w-16 aspect-h-9">
-                                <iframe
-                                    src={course.videoPreview}
-                                    title={course.title}
-                                    className="w-full h-64 lg:h-96 rounded-lg"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                />
-                            </div>
+                            <VideoPlayer
+                                pasCourses={course.milestones}
+                                modules={course.milestones.flatMap(m => m.modules)}
+                            />
                         </div>
+
+                        {/* Milestones Accordion */}
+
 
                         {/* Description */}
                         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                             <h2 className="text-xl font-bold mb-4">Description</h2>
                             <p className="text-gray-700 leading-relaxed">
-                                {course.longDescription || course.description || 'No description available.'}
+                                {course.longDescription ||
+                                    course.description ||
+                                    "No description available."}
                             </p>
                         </div>
-
 
                         {/* Reviews */}
                         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -212,7 +210,9 @@ export default async function CourseDetailPage({ params }) {
                                                 </span>
                                             </div>
                                             <p className="text-gray-700 mt-1">{r.review}</p>
-                                            <p className="text-sm text-gray-400">{new Date(r.createdAt).toLocaleDateString()}</p>
+                                            <p className="text-sm text-gray-400">
+                                                {new Date(r.createdAt).toLocaleDateString()}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -220,10 +220,11 @@ export default async function CourseDetailPage({ params }) {
                                 <p className="text-gray-500">No reviews yet.</p>
                             )}
 
-                           <RatingForm courseId={course._id.toString()} user={session.user.email} />
-
+                            <RatingForm
+                                courseId={course._id.toString()}
+                                user={session.user.email}
+                            />
                         </div>
-
 
                         {/* Instructor */}
                         {course.instructor && (
@@ -233,12 +234,16 @@ export default async function CourseDetailPage({ params }) {
                                     <div className="flex-shrink-0">
                                         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                                             <span className="text-blue-600 font-bold text-xl">
-                                                {course.instructor.name ? course.instructor.name.charAt(0).toUpperCase() : 'I'}
+                                                {course.instructor.name
+                                                    ? course.instructor.name.charAt(0).toUpperCase()
+                                                    : "I"}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-semibold">{course.instructor.name}</h3>
+                                        <h3 className="text-lg font-semibold">
+                                            {course.instructor.name}
+                                        </h3>
                                         <p className="text-gray-600 mt-2">{course.instructor.bio}</p>
                                     </div>
                                 </div>
@@ -253,7 +258,7 @@ export default async function CourseDetailPage({ params }) {
                             <div className="w-full bg-gray-200 rounded-full h-4">
                                 <div
                                     className="bg-blue-600 h-4 rounded-full transition-all duration-300"
-                                    style={{ width: '25%' }}
+                                    style={{ width: "25%" }}
                                 ></div>
                             </div>
                             <p className="text-sm text-gray-600">25% complete</p>
@@ -265,19 +270,33 @@ export default async function CourseDetailPage({ params }) {
                                         {course.resources.downloadables.map((item, index) => (
                                             <a
                                                 key={index}
-                                                href={item.url || '#'}
+                                                href={item.url || "#"}
                                                 download
                                                 className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                                             >
-                                                <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                <svg
+                                                    className="w-5 h-5 text-blue-600 mr-2"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                    />
                                                 </svg>
-                                                <span className="text-sm text-gray-700">{item.name || `Resource ${index + 1}`}</span>
+                                                <span className="text-sm text-gray-700">
+                                                    {item.name || `Resource ${index + 1}`}
+                                                </span>
                                             </a>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-sm text-gray-500">No downloadable materials available</p>
+                                    <p className="text-sm text-gray-500">
+                                        No downloadable materials available
+                                    </p>
                                 )}
                             </div>
 
@@ -294,5 +313,5 @@ export default async function CourseDetailPage({ params }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }

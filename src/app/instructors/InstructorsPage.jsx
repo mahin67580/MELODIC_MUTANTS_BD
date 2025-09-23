@@ -11,6 +11,29 @@ export default function InstructorsPage({ instructors }) {
   const [minExp, setMinExp] = useState("");
   const [maxExp, setMaxExp] = useState("");
 
+  // Instrument options (matching InstructorRegisterPage)
+  const instrumentOptions = [
+    "Acoustic Guitar",
+    "Electric Guitar",
+    "Classical Guitar",
+    "Bass Guitar",
+    "Piano / Keyboard",
+    "Drums / Percussion",
+    "Violin",
+    "Cello",
+    "Flute",
+    "Saxophone",
+    "Clarinet",
+    "Trumpet",
+    "Trombone",
+    "Vocals (Singing)",
+    "Ukulele",
+    "Harmonica",
+    "Banjo",
+    "Tabla / Hand Drums",
+    "Digital Music Production"
+  ];
+
   // ✅ Filtering logic
   const filtered = instructors.filter((inst) => {
     const matchesSearch =
@@ -19,8 +42,7 @@ export default function InstructorsPage({ instructors }) {
       inst.bio.toLowerCase().includes(search.toLowerCase());
 
     const matchesInstrument =
-      instrument === "" ||
-      inst.instrument.toLowerCase() === instrument.toLowerCase();
+      instrument === "" || inst.instrument === instrument;
 
     const matchesExperience =
       (!minExp || inst.experienceYears >= Number(minExp)) &&
@@ -28,9 +50,6 @@ export default function InstructorsPage({ instructors }) {
 
     return matchesSearch && matchesInstrument && matchesExperience;
   });
-
-  // ✅ Unique instruments
-  const instruments = [...new Set(instructors.map((i) => i.instrument))];
 
   // ✅ Reset filters
   const clearFilters = () => {
@@ -62,13 +81,13 @@ export default function InstructorsPage({ instructors }) {
           className="border rounded-lg p-2 w-full"
         >
           <option value="">All Instruments</option>
-          {instruments.map((inst) => (
+          {instrumentOptions.map((inst) => (
             <option key={inst} value={inst}>
               {inst}
             </option>
           ))}
         </select>
-{/* 
+
         <input
           type="number"
           placeholder="Min Experience"
@@ -83,11 +102,11 @@ export default function InstructorsPage({ instructors }) {
           value={maxExp}
           onChange={(e) => setMaxExp(e.target.value)}
           className="border rounded-lg p-2 w-full"
-        /> */}
+        />
 
         <button
           onClick={clearFilters}
-          className=" bg-blue-500 hover:bg-gray-300  hover:translate-0.5  rounded-lg p-2 w-full"
+          className="bg-blue-500 text-white hover:bg-blue-600 rounded-lg p-2 w-full transition-colors"
         >
           Clear Filters
         </button>
@@ -100,20 +119,20 @@ export default function InstructorsPage({ instructors }) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((inst) => (
             <Link key={inst._id} href={`/instructors/${inst._id}`}>
-              <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+              <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-shadow cursor-pointer h-full flex flex-col">
                 <img
                   src={inst.image || "/default-avatar.png"}
                   alt={inst.name}
                   className="w-full h-48 object-cover"
                 />
-                <div className="p-5 space-y-3">
+                <div className="p-5 flex flex-col flex-grow space-y-3">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <FaUserTie className="text-green-600" /> {inst.name}
                   </h2>
                   <p className="text-gray-600 text-sm flex items-center gap-2">
                     <MdOutlineEmail className="text-gray-500" /> {inst.email}
                   </p>
-                  <p className="text-gray-700 text-sm line-clamp-2">
+                  <p className="text-gray-700 text-sm line-clamp-3 flex-grow">
                     {inst.bio}
                   </p>
                   <div className="flex items-center gap-4 text-sm text-gray-700">
@@ -126,12 +145,12 @@ export default function InstructorsPage({ instructors }) {
                     </span>
                   </div>
                   {inst.achievements && (
-                    <p className="text-sm flex items-center gap-2 text-gray-600">
-                      <FaAward className="text-yellow-500" />{" "}
+                    <p className="text-sm flex items-center gap-2 text-gray-600 line-clamp-2">
+                      <FaAward className="text-yellow-500" /> 
                       {inst.achievements}
                     </p>
                   )}
-                  <span className="text-green-600 text-sm hover:underline block">
+                  <span className="text-green-600 text-sm hover:underline block mt-auto pt-2">
                     View Profile →
                   </span>
                 </div>

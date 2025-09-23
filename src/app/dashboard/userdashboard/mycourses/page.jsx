@@ -100,30 +100,7 @@ export default function MyCoursesPage() {
                                             </span>
                                         </div>
 
-                                        {/* <div className="flex items-center justify-between">
-                                            <div className="flex items-center">
-                                                <div className="flex items-center">
-                                                    {Array.from({ length: 5 }, (_, i) => (
-                                                        <span
-                                                            key={i}
-                                                            className={`text-sm ${
-                                                                i < Math.floor(course.rating || 0)
-                                                                    ? 'text-yellow-400'
-                                                                    : 'text-gray-300'
-                                                            }`}
-                                                        >
-                                                            ⭐
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                <span className="text-xs text-gray-600 ml-1">
-                                                    ({course.rating || 0})
-                                                </span>
-                                            </div>
-                                            <span className="text-xs text-gray-500">
-                                                {course.studentsEnrolled || 0} students
-                                            </span>
-                                        </div> */}
+                            
 
                                         <div className="mt-4 pt-3 border-t border-gray-100">
                                             <div className="w-full bg-gray-200 rounded-full h-2">

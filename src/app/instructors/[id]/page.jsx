@@ -4,6 +4,7 @@ import { dbConnect, collectionNamesObj } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
 import Link from "next/link";
 
+import Instructorcourse from "@/app/components/Instructorcourse";
 export const dynamic = "force-dynamic"; // always fresh
 // or: export const revalidate = 60;
 
@@ -29,6 +30,17 @@ export default async function InstructorDetailPage({ params }) {
             </div>
         );
     }
+
+    // ✅ Connect to DB and fetch courses belonging to this user
+    const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
+    const data = await lessonCollection
+        .find({ email: instructor.email }) // filter by email
+        .toArray();
+
+    const courses = data.map((doc) => ({
+        ...doc,
+        _id: doc._id.toString(), // convert for React keys
+    }));
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-10">
@@ -91,6 +103,17 @@ export default async function InstructorDetailPage({ params }) {
                         })}
                     </p>
                 </div>
+            </div>
+
+
+            <div className="min-h-screen p-6 md:p-12 bg-gray-50">
+                <h1 className="text-3xl font-bold mb-6 text-center">📚 Courses By {instructor.name} </h1>
+
+                {courses.length > 0 ? (
+                    <Instructorcourse courses={courses} />
+                ) : (
+                    <p className="text-center text-gray-500">No courses found for your account.</p>
+                )}
             </div>
         </div>
     );

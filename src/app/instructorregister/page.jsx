@@ -1,13 +1,15 @@
 "use client";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { signIn } from "next-auth/react";
 
 export default function InstructorRegisterPage() {
 
   const { data: session, status } = useSession()
   // console.log(session?.user?.email);
-
+  const router = useRouter();
 
   const [form, setForm] = useState({
     name: "",
@@ -23,6 +25,29 @@ export default function InstructorRegisterPage() {
   const [loading, setLoading] = useState(false); // register button
   const [uploading, setUploading] = useState(false); // image uploading
   const [message, setMessage] = useState("");
+
+  // Instrument options
+  const instrumentOptions = [
+    "Acoustic Guitar",
+    "Electric Guitar",
+    "Classical Guitar",
+    "Bass Guitar",
+    "Piano / Keyboard",
+    "Drums / Percussion",
+    "Violin",
+    "Cello",
+    "Flute",
+    "Saxophone",
+    "Clarinet",
+    "Trumpet",
+    "Trombone",
+    "Vocals (Singing)",
+    "Ukulele",
+    "Harmonica",
+    "Banjo",
+    "Tabla / Hand Drums",
+    "Digital Music Production"
+  ];
 
   // handle form inputs
   const handleChange = (e) => {
@@ -87,12 +112,15 @@ export default function InstructorRegisterPage() {
           achievements: "",
           image: "",
         });
+        
+        router.push('/instructordashboard/addcourse')
         Swal.fire({
           icon: "success",
           title: "Success!",
           text: "Instructor registered successfully 🎉",
           confirmButtonColor: "#3085d6",
         });
+
       } else {
         Swal.fire({
           icon: "error",
@@ -135,13 +163,10 @@ export default function InstructorRegisterPage() {
         <input
           type="email"
           name="email"
-          //value={form.email}
           disabled
           defaultValue={session?.user?.email}
-         // onChange={handleChange}
           placeholder="Email"
           className="w-full border rounded p-2"
-          //required
         />
 
         {/* Password */}
@@ -168,15 +193,22 @@ export default function InstructorRegisterPage() {
 
         {/* Instrument & Experience */}
         <div className="grid sm:grid-cols-2 gap-4">
-          <input
-            type="text"
+          {/* Instrument Dropdown */}
+          <select
             name="instrument"
             value={form.instrument}
             onChange={handleChange}
-            placeholder="Instrument (e.g., Guitar)"
             className="border rounded p-2"
             required
-          />
+          >
+            <option value="">Select Instrument</option>
+            {instrumentOptions.map((instrument, index) => (
+              <option key={index} value={instrument}>
+                {instrument}
+              </option>
+            ))}
+          </select>
+          
           <input
             type="number"
             name="experienceYears"
@@ -254,8 +286,8 @@ export default function InstructorRegisterPage() {
           type="submit"
           disabled={loading || uploading}
           className={`w-full py-2 rounded-lg transition ${loading || uploading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 text-white hover:bg-green-700"
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-green-600 text-white hover:bg-green-700"
             }`}
         >
           {loading ? "Registering..." : "Register"}

@@ -72,12 +72,12 @@ export default function instructorcoursemanage({ courses }) {
                 >
                   Edit
                 </Link>
-                <button
+                {/* <button
                   onClick={() => handleDelete(course._id)}
                   className="btn btn-sm btn-error text-white"
                 >
                   Delete
-                </button>
+                </button> */}
               </td>
             </tr>
           ))}

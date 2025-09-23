@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Swal from "sweetalert2";
+
 export default function UploadCoursePage() {
   const [form, setForm] = useState({
     title: "",
@@ -9,7 +10,6 @@ export default function UploadCoursePage() {
     category: "",
     description: "",
     price: "",
-    videoPreview: "",
     instructorName: "",
     instructorBio: "",
     thumbnail: "",
@@ -22,9 +22,64 @@ export default function UploadCoursePage() {
   const [resourceName, setResourceName] = useState("");
   const [resourceUrl, setResourceUrl] = useState("");
 
+  // ---------- MILESTONES ----------
+  const [milestones, setMilestones] = useState([]);
+  const [milestoneTitle, setMilestoneTitle] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false); // image uploading
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Instrument options
+  const instrumentOptions = [
+    "Acoustic Guitar",
+    "Electric Guitar",
+    "Classical Guitar",
+    "Bass Guitar",
+    "Piano / Keyboard",
+    "Drums / Percussion",
+    "Violin",
+    "Cello",
+    "Flute",
+    "Saxophone",
+    "Clarinet",
+    "Trumpet",
+    "Trombone",
+    "Vocals (Singing)",
+    "Ukulele",
+    "Harmonica",
+    "Banjo",
+    "Tabla / Hand Drums",
+    "Digital Music Production"
+  ];
+
+  // Level options
+  const levelOptions = [
+    "Beginner",
+    "Intermediate",
+    "Advanced",
+    "Masterclass"
+  ];
+
+  // Category options
+  const categoryOptions = [
+    "Fundamentals",
+    "Technique",
+    "Performance",
+    "Improvisation",
+    "Songwriting",
+    "Composition",
+    "Ear Training",
+    "Music Theory",
+    "Sight Reading",
+    "Stage Presence",
+    "Fingerstyle (Guitar)",
+    "Slap & Pop (Bass)",
+    "Double Bass Pedal (Drums)",
+    "Chord Progressions",
+    "Lead Playing / Soloing",
+    "Rhythm & Groove"
+  ];
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -39,13 +94,51 @@ export default function UploadCoursePage() {
 
   const addResource = () => {
     if (resourceName.trim() && resourceUrl.trim()) {
-      setResources([...resources, {
-        name: resourceName.trim(),
-        url: resourceUrl.trim()
-      }]);
+      setResources([
+        ...resources,
+        { name: resourceName.trim(), url: resourceUrl.trim() },
+      ]);
       setResourceName("");
       setResourceUrl("");
     }
+  };
+
+  // ---------- ADD NEW MILESTONE ----------
+  const addMilestone = () => {
+    if (milestoneTitle.trim()) {
+      setMilestones([
+        ...milestones,
+        {
+          title: milestoneTitle.trim(),
+          modules: [],
+          newModuleTitle: "",
+          newModuleVideo: "",
+        },
+      ]);
+      setMilestoneTitle("");
+    }
+  };
+
+  // ---------- HANDLE MODULE INPUT PER MILESTONE ----------
+  const handleModuleInputChange = (index, field, value) => {
+    const updated = [...milestones];
+    updated[index][field] = value;
+    setMilestones(updated);
+  };
+
+  // ---------- ADD MODULE TO SPECIFIC MILESTONE ----------
+  const addModule = (index) => {
+    const updated = [...milestones];
+    const milestone = updated[index];
+    if (milestone.newModuleTitle.trim() && milestone.newModuleVideo.trim()) {
+      milestone.modules.push({
+        title: milestone.newModuleTitle.trim(),
+        video: milestone.newModuleVideo.trim(),
+      });
+      milestone.newModuleTitle = "";
+      milestone.newModuleVideo = "";
+    }
+    setMilestones(updated);
   };
 
   const handleImageUpload = async (e) => {
@@ -84,6 +177,9 @@ export default function UploadCoursePage() {
     setMessage("");
 
     try {
+      // remove temp inputs before sending
+      const cleanedMilestones = milestones.map(({ newModuleTitle, newModuleVideo, ...rest }) => rest);
+
       const res = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,15 +191,13 @@ export default function UploadCoursePage() {
           longDescription: form.description,
           price: Number(form.price),
           thumbnail: form.thumbnail,
-          videoPreview: form.videoPreview,
           instructor: {
             name: form.instructorName,
             bio: form.instructorBio,
           },
           syllabus,
-          resources: {
-            downloadables: resources,
-          },
+          resources: { downloadables: resources },
+          milestones: cleanedMilestones, // send cleaned milestones with modules
         }),
       });
 
@@ -116,13 +210,13 @@ export default function UploadCoursePage() {
           category: "",
           description: "",
           price: "",
-          videoPreview: "",
           instructorName: "",
           instructorBio: "",
           thumbnail: "",
         });
         setSyllabus([]);
         setResources([]);
+        setMilestones([]);
 
         Swal.fire({
           icon: "success",
@@ -149,7 +243,7 @@ export default function UploadCoursePage() {
   };
 
   return (
-    <div className="  mx-auto p-6">
+    <div className="mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Upload New Course</h1>
       <form
         onSubmit={handleSubmit}
@@ -168,30 +262,53 @@ export default function UploadCoursePage() {
 
         {/* Instrument, Level, Category */}
         <div className="grid sm:grid-cols-3 gap-4">
-          <input
-            type="text"
+          {/* Instrument Dropdown */}
+          <select
             name="instrument"
             value={form.instrument}
             onChange={handleChange}
-            placeholder="Instrument"
             className="border rounded p-2"
-          />
-          <input
-            type="text"
+            required
+          >
+            <option value="">Select Instrument</option>
+            {instrumentOptions.map((instrument, index) => (
+              <option key={index} value={instrument}>
+                {instrument}
+              </option>
+            ))}
+          </select>
+
+          {/* Level Dropdown */}
+          <select
             name="level"
             value={form.level}
             onChange={handleChange}
-            placeholder="Level"
             className="border rounded p-2"
-          />
-          <input
-            type="text"
+            required
+          >
+            <option value="">Select Level</option>
+            {levelOptions.map((level, index) => (
+              <option key={index} value={level}>
+                {level}
+              </option>
+            ))}
+          </select>
+
+          {/* Category Dropdown */}
+          <select
             name="category"
             value={form.category}
             onChange={handleChange}
-            placeholder="Category"
             className="border rounded p-2"
-          />
+            required
+          >
+            <option value="">Select Category</option>
+            {categoryOptions.map((category, index) => (
+              <option key={index} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Description */}
@@ -227,33 +344,6 @@ export default function UploadCoursePage() {
               disabled={uploading}
             />
           </label>
-
-          {uploading && (
-            <div className="mt-2 text-blue-600 flex items-center gap-2">
-              <svg
-                className="animate-spin h-5 w-5 text-blue-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-              <span>Uploading image...</span>
-            </div>
-          )}
-          {/* /form.thumbnail */}
           {form.thumbnail && !uploading && (
             <div className="mt-2">
               <img
@@ -264,17 +354,6 @@ export default function UploadCoursePage() {
             </div>
           )}
         </div>
-
-        {/* YouTube Video */}
-        <input
-          type="text"
-          name="videoPreview"
-          value={form.videoPreview}
-          onChange={handleChange}
-          placeholder="YouTube Video Link"
-          className="w-full border rounded p-2"
-          required
-        />
 
         {/* Instructor */}
         <div className="grid sm:grid-cols-2 gap-4">
@@ -296,9 +375,82 @@ export default function UploadCoursePage() {
           />
         </div>
 
+        {/* ---------- Milestones & Modules Section ---------- */}
+        <div>
+          <label className="block font-medium mb-1">Course Milestones</label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={milestoneTitle}
+              onChange={(e) => setMilestoneTitle(e.target.value)}
+              placeholder="Milestone Title (e.g. Milestone 1)"
+              className="flex-1 border rounded p-2"
+            />
+            <button
+              type="button"
+              onClick={addMilestone}
+              className="bg-blue-600 text-white px-4 rounded"
+            >
+              Add Milestone
+            </button>
+          </div>
+
+          {milestones.map((m, mi) => (
+            <div key={mi} className="border rounded p-3 mb-3">
+              <h3 className="font-semibold">{m.title}</h3>
+
+              {/* Add Module under this milestone */}
+              <div className="flex gap-2 mt-2">
+                <input
+                  type="text"
+                  value={m.newModuleTitle}
+                  onChange={(e) =>
+                    handleModuleInputChange(mi, "newModuleTitle", e.target.value)
+                  }
+                  placeholder="Module Title"
+                  className="flex-1 border rounded p-2"
+                />
+                <input
+                  type="text"
+                  value={m.newModuleVideo}
+                  onChange={(e) =>
+                    handleModuleInputChange(mi, "newModuleVideo", e.target.value)
+                  }
+                  placeholder="Video Link"
+                  className="flex-1 border rounded p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => addModule(mi)}
+                  className="bg-green-600 text-white px-4 rounded"
+                >
+                  Add Module
+                </button>
+              </div>
+
+              {/* Show modules */}
+              <ul className="mt-2 list-disc pl-6">
+                {m.modules.map((mod, idx) => (
+                  <li key={idx}>
+                    <strong>{mod.title}:</strong>{" "}
+                    <a
+                      href={mod.video}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      {mod.video}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
         {/* Syllabus */}
         <div>
-          <label className="block font-medium mb-1">Course Content / Syllabus</label>
+          <label className="block font-medium mb-1">Extra Syllabus Points</label>
           <div className="flex gap-2">
             <input
               type="text"
@@ -351,7 +503,15 @@ export default function UploadCoursePage() {
           <ul className="mt-2 list-disc pl-6">
             {resources.map((r, i) => (
               <li key={i}>
-                <strong>{r.name}:</strong> <a href={r.url} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">{r.url}</a>
+                <strong>{r.name}:</strong>{" "}
+                <a
+                  href={r.url}
+                  className="text-blue-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {r.url}
+                </a>
               </li>
             ))}
           </ul>
@@ -361,15 +521,15 @@ export default function UploadCoursePage() {
         <button
           type="submit"
           disabled={loading || uploading}
-          className={`w-full py-2 rounded-lg transition ${loading || uploading
-            ? "bg-gray-400 cursor-not-allowed"
-            : " bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-            }`}
+          className={`w-full py-2 rounded-lg transition ${
+            loading || uploading
+              ? "bg-gray-400 cursor-not-allowed"
+              : " bg-blue-600 text-white hover:bg-blue-700"
+          }`}
         >
           {loading ? "Uploading..." : "Upload Course"}
         </button>
       </form>
-
       {message && <p className="mt-4 text-center">{message}</p>}
     </div>
   );

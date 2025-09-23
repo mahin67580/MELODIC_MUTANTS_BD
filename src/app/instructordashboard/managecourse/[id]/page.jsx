@@ -9,6 +9,7 @@ export default function EditCoursePage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+  const [imageUploading, setImageUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     instrument: "",
@@ -29,6 +30,16 @@ export default function EditCoursePage() {
   const [resources, setResources] = useState([]);
   const [resourceName, setResourceName] = useState("");
   const [resourceUrl, setResourceUrl] = useState("");
+
+  const [milestones, setMilestones] = useState([]);
+  const [currentMilestone, setCurrentMilestone] = useState({
+    title: "",
+    modules: [],
+  });
+  const [currentModule, setCurrentModule] = useState({
+    title: "",
+    video: "",
+  });
 
   // ✅ Fetch course details
   useEffect(() => {
@@ -55,6 +66,7 @@ export default function EditCoursePage() {
 
         setSyllabus(data.syllabus || []);
         setResources(data.resources?.downloadables || []);
+        setMilestones(data.milestones || []);
 
         setLoading(false);
       } catch (error) {
@@ -97,6 +109,49 @@ export default function EditCoursePage() {
     setResources(resources.filter((_, i) => i !== index));
   };
 
+  // ✅ Handle milestone changes
+  const handleMilestoneChange = (e) => {
+    const { value } = e.target;
+    setCurrentMilestone({ ...currentMilestone, title: value });
+  };
+
+  // ✅ Add milestone
+  const addMilestone = () => {
+    if (currentMilestone.title.trim()) {
+      setMilestones([...milestones, { ...currentMilestone, modules: [] }]);
+      setCurrentMilestone({ title: "", modules: [] });
+    }
+  };
+
+  const removeMilestone = (index) => {
+    setMilestones(milestones.filter((_, i) => i !== index));
+  };
+
+  // ✅ Handle module changes
+  const handleModuleChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentModule({ ...currentModule, [name]: value });
+  };
+
+  // ✅ Add module to current milestone
+  const addModuleToMilestone = (milestoneIndex) => {
+    if (currentModule.title.trim() && currentModule.video.trim()) {
+      const updatedMilestones = [...milestones];
+      updatedMilestones[milestoneIndex].modules.push({ ...currentModule });
+      setMilestones(updatedMilestones);
+      setCurrentModule({ title: "", video: "" });
+    }
+  };
+
+  // ✅ Remove module from milestone
+  const removeModuleFromMilestone = (milestoneIndex, moduleIndex) => {
+    const updatedMilestones = [...milestones];
+    updatedMilestones[milestoneIndex].modules = updatedMilestones[
+      milestoneIndex
+    ].modules.filter((_, i) => i !== moduleIndex);
+    setMilestones(updatedMilestones);
+  };
+
   // ✅ Upload new image
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -106,6 +161,7 @@ export default function EditCoursePage() {
     formDataUpload.append("file", file);
 
     try {
+      setImageUploading(true); // start loading
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formDataUpload,
@@ -120,6 +176,8 @@ export default function EditCoursePage() {
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Upload error", "error");
+    } finally {
+      setImageUploading(false); // stop loading
     }
   };
 
@@ -140,6 +198,7 @@ export default function EditCoursePage() {
           },
           syllabus,
           resources: { downloadables: resources },
+          milestones,
         }),
       });
 
@@ -216,10 +275,15 @@ export default function EditCoursePage() {
         <div>
           <label className="block font-medium mb-1">Course Image</label>
           <label className="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded-lg inline-block hover:bg-blue-700 transition-colors">
-            Choose Image
+            {imageUploading ? "Uploading..." : "Choose Image"}
             <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
           </label>
-          {formData.thumbnail && (
+
+          {imageUploading && (
+            <p className="text-sm text-gray-500 mt-1 animate-pulse">⏳ Uploading image...</p>
+          )}
+
+          {formData.thumbnail && !imageUploading && (
             <div className="mt-2">
               <img
                 src={formData.thumbnail}
@@ -311,6 +375,103 @@ export default function EditCoursePage() {
           </ul>
         </div>
 
+        {/* Milestones and Modules */}
+        <div>
+          <label className="block font-medium mb-1">Milestones & Modules</label>
+
+          {/* Add New Milestone */}
+          <div className="mb-4 p-4 border rounded-lg">
+            <h3 className="font-medium mb-2">Add New Milestone</h3>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={currentMilestone.title}
+                onChange={handleMilestoneChange}
+                placeholder="Milestone Title"
+                className="flex-1 border rounded p-2"
+              />
+              <button type="button" onClick={addMilestone} className="bg-blue-600 text-white px-4 rounded">
+                Add Milestone
+              </button>
+            </div>
+          </div>
+
+          {/* Existing Milestones */}
+          {milestones.map((milestone, milestoneIndex) => (
+            <div key={milestoneIndex} className="mb-4 p-4 border rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium">Milestone: {milestone.title}</h3>
+                <button
+                  type="button"
+                  onClick={() => removeMilestone(milestoneIndex)}
+                  className="text-red-500 text-sm"
+                >
+                  ❌ Remove Milestone
+                </button>
+              </div>
+
+              {/* Add Module to this Milestone */}
+              <div className="mb-3 p-3 bg-gray-50 rounded">
+                <h4 className="font-medium mb-2">Add Module to this Milestone</h4>
+                <div className="grid gap-2 mb-2">
+                  <input
+                    type="text"
+                    name="title"
+                    value={currentModule.title}
+                    onChange={handleModuleChange}
+                    placeholder="Module Title"
+                    className="border rounded p-2"
+                  />
+                  <input
+                    type="text"
+                    name="video"
+                    value={currentModule.video}
+                    onChange={handleModuleChange}
+                    placeholder="Video URL"
+                    className="border rounded p-2"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => addModuleToMilestone(milestoneIndex)}
+                  className="bg-green-600 text-white px-4 py-1 rounded"
+                >
+                  Add Module
+                </button>
+              </div>
+
+              {/* Existing Modules */}
+              <div>
+                <h4 className="font-medium mb-2">Modules:</h4>
+                {milestone.modules.length > 0 ? (
+                  <ul className="space-y-2">
+                    {milestone.modules.map((module, moduleIndex) => (
+                      <li key={moduleIndex} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                        <div>
+                          <strong>{module.title}</strong>
+                          <br />
+                          <a href={module.video} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm">
+                            {module.video}
+                          </a>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeModuleFromMilestone(milestoneIndex, moduleIndex)}
+                          className="text-red-500 text-sm"
+                        >
+                          ❌
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No modules added yet.</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Resources */}
         <div>
           <label className="block font-medium mb-1">Resources (PDF Links)</label>
@@ -353,9 +514,11 @@ export default function EditCoursePage() {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          disabled={imageUploading} // disable while uploading
+          className={`w-full py-2 rounded-lg transition 
+    ${imageUploading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
         >
-          Save Changes
+          {imageUploading ? "Uploading Image..." : "Save Changes"}
         </button>
       </form>
     </div>

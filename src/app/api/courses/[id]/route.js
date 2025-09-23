@@ -5,7 +5,7 @@ import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 // ✅ GET /api/courses/:id → get single course
 export async function GET(req, { params }) {
   try {
-    const { id } =await params;
+    const { id } = await params;
     const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
 
     const course = await lessonCollection.findOne({ _id: new ObjectId(id) });
@@ -36,7 +36,18 @@ export async function PATCH(req, { params }) {
     }
     // 🔹 Case 2: General updates (title, price, etc.)
     else {
-      updateQuery = { $set: body };
+      // Ensure milestones array exists and is properly formatted
+      const updateData = { ...body };
+      
+      // If milestones are provided, ensure they have the correct structure
+      if (updateData.milestones) {
+        updateData.milestones = updateData.milestones.map(milestone => ({
+          title: milestone.title || "",
+          modules: milestone.modules || []
+        }));
+      }
+      
+      updateQuery = { $set: updateData };
     }
 
     const result = await lessonCollection.updateOne(
@@ -58,7 +69,7 @@ export async function PATCH(req, { params }) {
 // ✅ DELETE /api/courses/:id → delete course
 export async function DELETE(req, { params }) {
   try {
-    const { id } =await params;
+    const { id } = await params;
     const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
 
     const result = await lessonCollection.deleteOne({ _id: new ObjectId(id) });

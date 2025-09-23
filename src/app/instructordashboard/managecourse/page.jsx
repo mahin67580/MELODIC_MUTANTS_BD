@@ -1,9 +1,6 @@
-import ManageCoursesClient from "@/app/components/ManageCoursesClient";
 import Instructorcoursemanage from "@/app/components/Instructorcoursemanage";
 
 import { authOptions } from "@/lib/authOptions";
-
-
 import { collectionNamesObj, dbConnect } from "@/lib/dbconnect";
 import { getServerSession } from "next-auth";
 

@@ -4,13 +4,24 @@ import logo from '../../public/assets/LOGO1.svg'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from "react";
 
-export default function Navbar({ isInstructor }) {
+export default function Navbar() {
 
 
     const { data: session, status } = useSession()
+    const [isInstructor, setIsInstructor] = useState(false);
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            fetch("/api/instructor/check")
+                .then(res => res.json())
+                .then(data => setIsInstructor(data.isInstructor));
+        }
+    }, [status]);
 
     //console.log(session, status);
+
 
     const pathname = usePathname() // Get current path
 
@@ -97,7 +108,7 @@ export default function Navbar({ isInstructor }) {
 
             <div className='   w-full flex justify-center '>
                 <div className="navbar-center   top-2  lg:flex absolute  flex justify-center hidden    ">
-                    <ul className="menu menu-horizontal bg-base-100 rounded-2xl border-2 px-10  py-5        ">
+                    <ul className="menu menu-horizontal bg-base-100 rounded-2xl border-2 shadow-2xl shadow-amber-100 px-10  py-5        ">
                         {links()}
                     </ul>
                 </div>
@@ -129,7 +140,7 @@ export default function Navbar({ isInstructor }) {
                                         }}
                                     />
                                     {/* Fallback initial - hidden by default */}
-                                    <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black hidden">
+                                    <div className="w-10  h-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black hidden">
                                         <span className="text-sm font-bold">
                                             {session?.user?.name?.charAt(0).toUpperCase() ||
                                                 session?.user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -138,8 +149,8 @@ export default function Navbar({ isInstructor }) {
                                 </div>
                             ) : (
                                 // Show initial if no image available
-                                <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black">
-                                    <span className="text-sm font-bold">
+                                <div className="w-10 rounded-full bg-primary   text-primary-content flex items-center justify-center border-2 border-black">
+                                    <span className="text-2xl font-bold      ">
                                         {session?.user?.name?.charAt(0).toUpperCase() ||
                                             session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                                     </span>
