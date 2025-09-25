@@ -4,10 +4,16 @@ import { useState } from "react";
 import { FaGuitar, FaAward, FaUserTie } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function InstructorsPage({ instructors }) {
   const [search, setSearch] = useState("");
-  const [instrument, setInstrument] = useState("");
+  const [instrument, setInstrument] = useState("all");
   const [minExp, setMinExp] = useState("");
   const [maxExp, setMaxExp] = useState("");
 
@@ -42,119 +48,160 @@ export default function InstructorsPage({ instructors }) {
       inst.bio.toLowerCase().includes(search.toLowerCase());
 
     const matchesInstrument =
-      instrument === "" || inst.instrument === instrument;
+      instrument === "all" || inst.instrument === instrument;
 
-    const matchesExperience =
-      (!minExp || inst.experienceYears >= Number(minExp)) &&
-      (!maxExp || inst.experienceYears <= Number(maxExp));
-
-    return matchesSearch && matchesInstrument && matchesExperience;
+    return matchesSearch && matchesInstrument;
   });
 
   // ✅ Reset filters
   const clearFilters = () => {
     setSearch("");
-    setInstrument("");
+    setInstrument("all");
     setMinExp("");
     setMaxExp("");
   };
 
+  // Get initials for avatar fallback
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold text-center mb-10">
-        Meet Our Instructors
-      </h1>
+    <div className="  px-4 py-10">
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold mb-3">
+          Meet Our Instructors
+        </h1>
+        <p className="text-muted-foreground">
+          Discover talented music instructors ready to guide your musical journey
+        </p>
+      </div>
 
       {/* 🔹 Filters */}
-      <div className="bg-white shadow-md rounded-xl p-4 mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <input
-          type="text"
-          placeholder="Search by name, email or bio..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg p-2 w-full"
-        />
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FaGuitar className="text-primary" />
+            Filter Instructors
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3  ">
+            <Input
+              type="text"
+              placeholder="Search by name, email or bio..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-        <select
-          value={instrument}
-          onChange={(e) => setInstrument(e.target.value)}
-          className="border rounded-lg p-2 w-full"
-        >
-          <option value="">All Instruments</option>
-          {instrumentOptions.map((inst) => (
-            <option key={inst} value={inst}>
-              {inst}
-            </option>
-          ))}
-        </select>
+            <Select value={instrument} onValueChange={setInstrument}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Instruments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Instruments</SelectItem>
+                {instrumentOptions.map((inst) => (
+                  <SelectItem key={inst} value={inst}>
+                    {inst}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-        <input
-          type="number"
-          placeholder="Min Experience"
-          value={minExp}
-          onChange={(e) => setMinExp(e.target.value)}
-          className="border rounded-lg p-2 w-full"
-        />
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <input
-          type="number"
-          placeholder="Max Experience"
-          value={maxExp}
-          onChange={(e) => setMaxExp(e.target.value)}
-          className="border rounded-lg p-2 w-full"
-        />
+      {/* 🔹 Results Count */}
+      <div className="mb-6 flex items-center justify-between">
+        <Badge variant="secondary">
+          {filtered.length} {filtered.length === 1 ? 'instructor' : 'instructors'} found
+        </Badge>
 
-        <button
-          onClick={clearFilters}
-          className="bg-blue-500 text-white hover:bg-blue-600 rounded-lg p-2 w-full transition-colors"
-        >
-          Clear Filters
-        </button>
+        {filtered.length !== instructors.length && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+          >
+            Show all instructors
+          </Button>
+        )}
       </div>
 
       {/* 🔹 Grid */}
       {filtered.length === 0 ? (
-        <p className="text-center text-gray-500">No instructors found.</p>
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="text-6xl mb-4">🎵</div>
+            <h3 className="text-xl font-semibold text-muted-foreground mb-2">
+              No instructors found
+            </h3>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or search terms
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((inst) => (
             <Link key={inst._id} href={`/instructors/${inst._id}`}>
-              <div className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-shadow cursor-pointer h-full flex flex-col">
-                <img
-                  src={inst.image || "/default-avatar.png"}
-                  alt={inst.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-5 flex flex-col flex-grow space-y-3">
-                  <h2 className="text-xl font-bold flex items-center gap-2">
-                    <FaUserTie className="text-green-600" /> {inst.name}
-                  </h2>
-                  <p className="text-gray-600 text-sm flex items-center gap-2">
-                    <MdOutlineEmail className="text-gray-500" /> {inst.email}
-                  </p>
-                  <p className="text-gray-700 text-sm line-clamp-3 flex-grow">
+              <Card className="group    cursor-pointer h-full hover:shadow-lg transition-all duration-300">
+                <CardHeader className="text-center ">
+                  {/* Centered Large Avatar */}
+
+                  <div className=" flex items-center gap-7  ">
+                    <Avatar className="h-30 w-30   border-4 border-background shadow-lg">
+                      <AvatarImage className={"object-cover"} src={inst.image || ""} alt={inst.name} />
+                      <AvatarFallback className="text-2xl font-bold ">
+                        {getInitials(inst.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-xl group-hover:text-primary transition-colors ">
+                        {inst.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center justify-center gap-1">
+                        <MdOutlineEmail className="flex-shrink-0" />
+                        {inst.email}
+                      </CardDescription>
+
+                    </div>
+                  </div>
+
+
+                </CardHeader>
+
+                <CardContent className="space-y-4 text-center">
+                  <p className="text-sm text-muted-foreground text-justify line-clamp-3">
                     {inst.bio}
                   </p>
-                  <div className="flex items-center gap-4 text-sm text-gray-700">
-                    <span className="flex items-center gap-1">
-                      <FaGuitar className="text-green-600" />
+
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <FaGuitar className="w-3 h-3" />
                       {inst.instrument}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      🎵 {inst.experienceYears} yrs
-                    </span>
+                    </Badge>
+
+                    <Badge variant="outline">
+                      🎵 {inst.experienceYears} years
+                    </Badge>
                   </div>
-                  {inst.achievements && (
-                    <p className="text-sm flex items-center gap-2 text-gray-600 line-clamp-2">
-                      <FaAward className="text-yellow-500" /> 
-                      {inst.achievements}
-                    </p>
-                  )}
-                  <span className="text-green-600 text-sm hover:underline block mt-auto pt-2">
-                    View Profile →
-                  </span>
-                </div>
-              </div>
+
+
+                  <div className="pt-4 border-t">
+                    <Button variant="ghost" size="sm" className="w-full">
+                      View Profile →
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </Link>
           ))}
         </div>

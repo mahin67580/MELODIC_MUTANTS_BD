@@ -90,9 +90,9 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Hero Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <section className="py-16 px-4 bg-gradient-to-br from-black/10 to-black/5   text-black">
         <div className="container mx-auto max-w-6xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">About Melodic Mutant Music Academy</h1>
+          <h1 className=" text-4xl lg:text-6xl font-bold  mb-6 text-center">𝕬𝖇𝖔𝖚𝖙 𝕸𝖊𝖑𝖔𝖉𝖎𝖈 𝕸𝖚𝖙𝖆𝖓𝖙 𝕸𝖚𝖘𝖎𝖈 𝕬𝖈𝖆𝖉𝖊𝖒𝖞</h1>
           <p className="text-xl md:text-2xl text-center max-w-3xl mx-auto">
             Transforming music education through innovative technology and world-class instruction
           </p>
@@ -105,12 +105,12 @@ const AboutUs = () => {
           <div className="flex flex-col md:flex-row items-center gap-10">
             <div className="md:w-1/2">
               <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-              <p className="text-lg mb-4">
+              <p className="text-lg mb-4 text-justify">
                 At Melodic Mutant Music Academy, we believe that everyone deserves access to quality music education. 
                 Our mission is to break down barriers to learning music by providing affordable, accessible, 
                 and engaging lessons for students of all ages and skill levels.
               </p>
-              <p className="text-lg">
+              <p className="text-lg text-justify">
                 Through our innovative platform, we connect students with expert instructors, provide 
                 personalized learning paths, and create a supportive community where musical dreams become reality.
               </p>

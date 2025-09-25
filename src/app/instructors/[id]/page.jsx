@@ -3,10 +3,14 @@ import { MdOutlineEmail } from "react-icons/md";
 import { dbConnect, collectionNamesObj } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
 import Link from "next/link";
-
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import Instructorcourse from "@/app/components/Instructorcourse";
-export const dynamic = "force-dynamic"; // always fresh
-// or: export const revalidate = 60;
+
+export const dynamic = "force-dynamic";
 
 export default async function InstructorDetailPage({ params }) {
     const { id } = await params;
@@ -23,98 +27,218 @@ export default async function InstructorDetailPage({ params }) {
     if (!instructor) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-10 text-center">
-                <h1 className="text-2xl font-bold">Instructor not found</h1>
-                <Link href="/instructors" className="text-green-600 hover:underline">
-                    ← Back to Instructors
-                </Link>
+                <Card>
+                    <CardContent className="pt-6">
+                        <h1 className="text-2xl font-bold mb-4">Instructor not found</h1>
+                        <Button asChild variant="outline">
+                            <Link href="/instructors">
+                                ← Back to Instructors
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
 
-    // ✅ Connect to DB and fetch courses belonging to this user
+    // Fetch courses belonging to this instructor
     const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
     const data = await lessonCollection
-        .find({ email: instructor.email }) // filter by email
+        .find({ email: instructor.email })
         .toArray();
 
     const courses = data.map((doc) => ({
         ...doc,
-        _id: doc._id.toString(), // convert for React keys
+        _id: doc._id.toString(),
     }));
 
+    // Get initials for avatar fallback
+    const getInitials = (name) => {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    };
+
     return (
-        <div className="max-w-3xl mx-auto px-4 py-10">
-            {/* Back button */}
-            <Link
-                href="/instructors"
-                className="inline-block mb-6 text-green-600 hover:underline"
-            >
-                ← Back to Instructors
-            </Link>
+        <div className="  px-4 py-8 space-y-8">
+            {/* Back Navigation */}
+            <section>
+                <Button asChild variant="ghost" className="pl-0">
+                    <Link href="/instructors">
+                        ← Back to Instructors
+                    </Link>
+                </Button>
+            </section>
 
-            {/* Profile Card */}
-            <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
-                {/* Image */}
-                <img
-                    src={instructor.image || "/default-avatar.png"}
-                    alt={instructor.name}
-                    className="w-full h-64 object-cover"
-                />
+            {/* Profile Header Section */}
+            <section>
+                <Card className="overflow-hidden">
+                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
+                                <AvatarImage className={'object-cover'}
+                                    src={instructor.image || ""}
+                                    alt={instructor.name}
+                                />
+                                <AvatarFallback className="text-3xl font-bold">
+                                    {getInitials(instructor.name)}
+                                </AvatarFallback>
+                            </Avatar>
 
-                <div className="p-6 space-y-4">
-                    {/* Name */}
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <FaUserTie className="text-green-600" /> {instructor.name}
-                    </h1>
-
-                    {/* Email */}
-                    <p className="text-gray-600 flex items-center gap-2">
-                        <MdOutlineEmail className="text-gray-500" /> {instructor.email}
-                    </p>
-
-                    {/* Bio */}
-                    <p className="text-gray-700 leading-relaxed">{instructor.bio}</p>
-
-                    {/* Instrument + Experience */}
-                    <div className="flex items-center gap-6 text-gray-700 text-sm">
-                        <span className="flex items-center gap-1">
-                            <FaGuitar className="text-green-600" /> {instructor.instrument}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            🎵 {instructor.experienceYears} yrs experience
-                        </span>
-                    </div>
-
-                    {/* Achievements */}
-                    {instructor.achievements && (
-                        <div className="flex items-start gap-2 text-sm text-gray-700">
-                            <FaAward className="text-yellow-500 mt-1" />
-                            <p>{instructor.achievements}</p>
+                            <div className="text-center md:text-left space-y-2">
+                                <h1 className="text-3xl font-bold">{instructor.name}</h1>
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                    <MdOutlineEmail className="w-4 h-4" />
+                                    <span>{instructor.email}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                                    <Badge variant="secondary" className="flex items-center gap-1">
+                                        <FaGuitar className="w-3 h-3" />
+                                        {instructor.instrument}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                        🎵 {instructor.experienceYears} years experience
+                                    </Badge>
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    </div>
+                </Card>
+            </section>
 
-                    {/* Registered At */}
-                    <p className="text-xs text-gray-500">
-                        Joined on{" "}
-                        {new Date(instructor.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                        })}
-                    </p>
+            <div className="grid gap-8 lg:grid-cols-3  ">
+                {/* Left Column - Bio and Details */}
+                <div className="lg:col-span-3 space-y-6">
+                    {/* Bio Section */}
+                    <section>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <FaUserTie className="text-primary" />
+                                    About Me
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-muted-foreground leading-relaxed">
+                                    {instructor.bio}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </section>
+
+                    {/* Achievements Section */}
+                    {instructor.achievements && (
+                        <section>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <FaAward className="text-amber-500" />
+                                        Achievements
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground">
+                                        {instructor.achievements}
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </section>
+                    )}
+                </div>
+
+                {/* Right Column - Sidebar Info */}
+
+            </div>
+
+            <div>
+                <div className="  grid lg:grid-cols-3  gap-3    ">
+                    {/* Experience Card */}
+                    <section  >
+                        <Card className={"h-44 "}>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Teaching Experience</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-center space-y-2">
+                                    <div className="text-4xl font-bold text-primary">
+                                        {instructor.experienceYears}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Years of Experience
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+
+                    {/* Join Date Card */}
+                    <section>
+                        <Card className={"h-44 "}>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Member Since</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-center">
+                                    <div className="text-lg font-semibold">
+                                        {new Date(instructor.createdAt).toLocaleDateString("en-US", {
+                                            year: "numeric",
+                                            month: "long",
+                                        })}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {new Date(instructor.createdAt).toLocaleDateString("en-US", {
+                                            day: "numeric",
+                                        })}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+
+                    {/* Instrument Card */}
+                    <section>
+                        <Card className={"h-44 "}>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Specialization</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center justify-center gap-2">
+                                    <FaGuitar className="text-primary w-5 h-5" />
+                                    <span className="font-medium">{instructor.instrument}</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
                 </div>
             </div>
 
+            {/* Courses Section */}
+            <section>
+                <Separator className="my-8" />
 
-            <div className="min-h-screen p-6 md:p-12 bg-gray-50">
-                <h1 className="text-3xl font-bold mb-6 text-center">📚 Courses By {instructor.name} </h1>
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold mb-2">
+                        📚 Courses by {instructor.name}
+                    </h2>
+                    <p className="text-muted-foreground">
+                        Explore all courses taught by this instructor
+                    </p>
+                </div>
 
                 {courses.length > 0 ? (
                     <Instructorcourse courses={courses} />
                 ) : (
-                    <p className="text-center text-gray-500">No courses found for your account.</p>
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="text-center py-8">
+                                <div className="text-6xl mb-4">📚</div>
+                                <h3 className="text-xl font-semibold mb-2">No Courses Available</h3>
+                                <p className="text-muted-foreground">
+                                    This instructor hasn't published any courses yet.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 )}
-            </div>
+            </section>
         </div>
     );
 }

@@ -2,9 +2,9 @@ import React from 'react'
 
 export default function Cta() {
     return (
-        <div>  <section className="py-16 px-4   ">
+        <div>  <section className=" pb-8 px-4   ">
             <div className="container mx-auto max-w-4xl text-center">
-                <h2 className="text-3xl font-bold mb-6">Ready to Start Your Musical Journey?</h2>
+                <h2 className="text-3xl  mb-6">𝕽𝖊𝖆𝖉𝖞 𝖙𝖔 𝕾𝖙𝖆𝖗𝖙 𝖄𝖔𝖚𝖗 𝕸𝖚𝖘𝖎𝖈𝖆𝖑 𝕵𝖔𝖚𝖗𝖓𝖊𝖞?</h2>
                 <p className="text-xl mb-8 max-w-2xl mx-auto">
                     Join thousands of students who have discovered the joy of making music with our platform.
                 </p>

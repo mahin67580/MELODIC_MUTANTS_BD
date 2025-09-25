@@ -4,6 +4,7 @@ import Comment from "./components/Comment";
 import Hero from "./components/Hero";
 import Footer from "@/components/Footer";
 import Cta from "@/components/Cta";
+import InstrumentsCard from "./components/InstrumentsCard";
 
 
 export default function Home() {
@@ -14,8 +15,9 @@ export default function Home() {
       </h1> */}
       <Hero></Hero>
       <Lessons></Lessons>
-      <Cta></Cta>
+      <InstrumentsCard></InstrumentsCard>
       <Comment></Comment>
+      <Cta></Cta>
 
 
     </main>

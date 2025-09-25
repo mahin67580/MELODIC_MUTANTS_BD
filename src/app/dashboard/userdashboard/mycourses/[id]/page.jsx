@@ -97,8 +97,8 @@ export default async function CourseDetailPage({ params }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen">
+            <div className="">
                 {/* Breadcrumb */}
                 <nav className="flex mb-6" aria-label="Breadcrumb">
                     <ol className="inline-flex items-center space-x-1 md:space-x-3">
@@ -150,17 +150,44 @@ export default async function CourseDetailPage({ params }) {
                                 </div>
                             </div>
 
-                            <div className="bg-blue-50 rounded-lg p-4">
-                                <h3 className="font-semibold text-blue-800 mb-2">
-                                    What you'll learn
-                                </h3>
-                                <ul className="flex justify-evenly flex-wrap">
-                                    {course.syllabus?.map((item, index) => (
-                                        <li className="btn" key={index}>
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 relative">
+                                <details className="group">
+                                    <summary className="flex justify-between items-center cursor-pointer list-none">
+                                        <h3 className="font-semibold text-blue-800 text-lg">
+                                            Things you'll learn
+                                        </h3>
+                                        <svg
+                                            className="w-5 h-5 text-blue-600 transition-transform duration-300 group-open:rotate-180"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </summary>
+
+                                    {/* Dropdown content positioned absolutely */}
+                                    <div className="absolute left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-blue-200 z-10 max-h-64 overflow-y-auto">
+                                        <ul className="p-4 space-y-3">
+                                            {course.syllabus?.map((item, index) => (
+                                                <li key={index} className="flex items-start">
+                                                    <svg
+                                                        className="w-5 h-5 text-green-500 mt-0.5 mr-3 flex-shrink-0"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                    <span className="text-gray-700 text-sm">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </details>
                             </div>
                         </div>
                     </div>

@@ -42,10 +42,10 @@ export default function MyCoursesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen ">
+            <div className="">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">My Courses</h1>
+                    <h1 className="text-3xl font-bold text-gray-800">𝕸𝖞 𝕮𝖔𝖚𝖗𝖘𝖊𝖘</h1>
                     <span className="text-gray-600">
                         {courses.length} {courses.length === 1 ? 'course' : 'courses'} enrolled
                     </span>
@@ -91,14 +91,14 @@ export default function MyCoursesPage() {
                                             Instructor : {course.instructor?.name || 'Unknown Instructor'}
                                         </p>
                                         
-                                        <div className="flex justify-between items-center mb-3">
+                                        {/* <div className="flex justify-between items-center mb-3">
                                             <span className="text-sm text-gray-500">
                                                 {course.duration} minutes
                                             </span>
                                             <span className="text-sm font-semibold text-green-600">
                                                 ${course.price}
                                             </span>
-                                        </div>
+                                        </div> */}
 
                             
 

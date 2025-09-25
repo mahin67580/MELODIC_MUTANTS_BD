@@ -28,7 +28,7 @@ export default async function ManageCoursesPage() {
   }));
 
   return (
-    <div className="min-h-screen p-6 md:p-12 bg-gray-50">
+    <div className="min-h-screen  ">
       <h1 className="text-3xl font-bold mb-6 text-center">📚 Manage Your Courses</h1>
 
       {courses.length > 0 ? (

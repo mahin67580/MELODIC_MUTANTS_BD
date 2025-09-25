@@ -62,11 +62,11 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen  ">
       {/* Hero Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <section className="py-16 px-4 bg-gradient-to-br from-black/10 to-black/5   text-black">
         <div className="container mx-auto max-w-6xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">Get In Touch</h1>
+          <h1 className="text-4xl lg:text-6xl font-bold  mb-6 text-center">𝕲𝖊𝖙 𝕴𝖓 𝕿𝖔𝖚𝖈𝖍</h1>
           <p className="text-xl md:text-2xl text-center max-w-3xl mx-auto">
             We'd love to hear from you. Reach out to us with questions, feedback, or to start your musical journey.
           </p>

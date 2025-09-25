@@ -3,16 +3,21 @@ import React, { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Swal from "sweetalert2"
 import { useRouter } from "next/navigation"
-
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Loader2, CreditCard, Mail, Phone, User, BookOpen, DollarSign, CheckCircle2 } from "lucide-react"
 
 export default function CheckoutPage({ params }) {
   const { data: session, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
-  const [alreadyBooked, setAlreadyBooked] = useState(false);
+  const [alreadyBooked, setAlreadyBooked] = useState(false)
   const router = useRouter()
-
-
-
 
   const [formData, setFormData] = useState({
     id: "",
@@ -29,10 +34,7 @@ export default function CheckoutPage({ params }) {
   useEffect(() => {
     const fetchLesson = async () => {
       const { id } = await params
-      const res = await fetch(
-        `/api/lesson/${id}`,
-        { cache: "no-store" }
-      )
+      const res = await fetch(`/api/lesson/${id}`, { cache: "no-store" })
       const data = await res.json()
       setLesson(data)
 
@@ -56,22 +58,18 @@ export default function CheckoutPage({ params }) {
     }
   }, [session, status])
 
-
   useEffect(() => {
     const checkBooking = async () => {
       if (status === "authenticated" && lesson?._id) {
-        const res = await fetch(
-          `/api/lesson?lessonId=${lesson._id}`,
-          { cache: "no-store" }
-        );
-        const data = await res.json();
+        const res = await fetch(`/api/lesson?lessonId=${lesson._id}`, { cache: "no-store" })
+        const data = await res.json()
         if (data.length > 0) {
-          setAlreadyBooked(true);
+          setAlreadyBooked(true)
         }
       }
-    };
-    checkBooking();
-  }, [status, lesson]);
+    }
+    checkBooking()
+  }, [status, lesson])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -87,32 +85,26 @@ export default function CheckoutPage({ params }) {
 
     try {
       // 1️⃣ First, save enrollment details (POST)
-      const postRes = await fetch(
-        `/api/lesson`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      )
+      const postRes = await fetch(`/api/lesson`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
 
       if (!postRes.ok) {
         throw new Error("Failed to save enrollment details")
       }
 
       // 2️⃣ Then, increment enrolledStudents (PATCH)
-      const patchRes = await fetch(
-        `/api/courses/${formData.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ enroll: true }), // ✅ tell API to increment enrolledStudents
-        }
-      )
+      const patchRes = await fetch(`/api/courses/${formData.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ enroll: true }),
+      })
 
       if (!patchRes.ok) {
         throw new Error("Failed to update course enrollment count")
@@ -150,205 +142,255 @@ export default function CheckoutPage({ params }) {
     }
   }
 
-
-  if (!lesson) return <>
+  if (!lesson) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <Loader2 className="h-12 w-12 animate-spin text-primary" />
     </div>
-  </>
+  )
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-muted/20 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">Checkout</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">Checkout</h1>
+          <p className="text-muted-foreground mt-2">Complete your enrollment</p>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Lesson Summary Section */}
-          <div className="w-full lg:w-2/5 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 pb-2 border-b">Lesson Summary</h2>
+          <div className="w-full lg:w-2/5">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Lesson Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="relative aspect-video rounded-lg overflow-hidden">
+                  <img
+                    src={lesson.thumbnail}
+                    alt={lesson.title}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
 
-            <img
-              src={lesson.thumbnail}
-              alt={lesson.title}
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold text-lg">{lesson.title}</h3>
+                    <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+                      {lesson.description}
+                    </p>
+                  </div>
 
-            <div className="space-y-3">
-              <div>
-                <h3 className="font-medium text-gray-700">Title</h3>
-                <p className="text-lg font-semibold">{lesson.title}</p>
-              </div>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary" className="capitalize">
+                      {lesson.level}
+                    </Badge>
+                    <Badge variant="outline">
+                      {lesson.instrument}
+                    </Badge>
+                  </div>
 
-              <div>
-                <h3 className="font-medium text-gray-700">Description</h3>
-                <p className="text-gray-600 line-clamp-3">{lesson.description}</p>
-              </div>
+                  {lesson.instructor?.name && (
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {lesson.instructor.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{lesson.instructor.name}</p>
+                        <p className="text-xs text-muted-foreground">Instructor</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex justify-between items-center pt-4 border-t">
-                <span className="font-medium text-gray-700">Total</span>
-                <span className="text-2xl font-bold text-blue-600">${lesson.price}</span>
-              </div>
-            </div>
+                <Separator />
+
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total Amount</span>
+                  <span className="text-2xl font-bold text-primary">${lesson.price}</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Checkout Form Section */}
-          <div className="w-full lg:w-3/5 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 pb-2 border-b">Payment Details</h2>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block font-medium mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full border px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full border px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full border px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g. +1234567890"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block font-medium mb-2">Lesson</label>
-                  <input
-                    type="text"
-                    name="lessonTitle"
-                    value={formData.lessonTitle}
-                    readOnly
-                    className="w-full border px-4 py-3 rounded-md bg-gray-50 cursor-not-allowed"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-2">Price</label>
-                  <input
-                    type="text"
-                    name="price"
-                    value={`$${formData.price}`}
-                    readOnly
-                    className="w-full border px-4 py-3 rounded-md bg-gray-50 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-medium mb-2">Payment Method</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className={`border rounded-md p-4 cursor-pointer ${formData.paymentMethod === 'credit-card' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: 'credit-card' })}>
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="credit-card"
-                        checked={formData.paymentMethod === "credit-card"}
+          <div className="w-full lg:w-3/5">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Details
+                </CardTitle>
+                <CardDescription>
+                  Enter your information to complete the enrollment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Full Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                        required
+                        placeholder="Enter your full name"
                       />
-                      <label className="ml-2 font-medium">Credit Card</label>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="Enter your email"
+                      />
                     </div>
                   </div>
 
-                  <div className={`border rounded-md p-4 cursor-pointer ${formData.paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: 'paypal' })}>
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={formData.paymentMethod === "paypal"}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="e.g. +1234567890"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="lessonTitle" className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Lesson
+                      </Label>
+                      <Input
+                        id="lessonTitle"
+                        name="lessonTitle"
+                        value={formData.lessonTitle}
+                        readOnly
+                        className="bg-muted/50"
                       />
-                      <label className="ml-2 font-medium">PayPal</label>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="price" className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Price
+                      </Label>
+                      <Input
+                        id="price"
+                        name="price"
+                        value={`$${formData.price}`}
+                        readOnly
+                        className="bg-muted/50"
+                      />
                     </div>
                   </div>
 
-                  <div className={`border rounded-md p-4 cursor-pointer ${formData.paymentMethod === 'stripe' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                    onClick={() => setFormData({ ...formData, paymentMethod: 'stripe' })}>
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="stripe"
-                        checked={formData.paymentMethod === "stripe"}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                      />
-                      <label className="ml-2 font-medium">Stripe</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || alreadyBooked}
-                className={`w-full py-3 rounded-md font-medium text-lg transition-colors shadow-md flex items-center justify-center
-    ${alreadyBooked ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
-              >
-                {alreadyBooked
-                  ? "Already Enrolled"
-                  : isLoading
-                    ? (
-                      <>
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
+                  <div className="space-y-4">
+                    <Label>Payment Method</Label>
+                    <RadioGroup 
+                      value={formData.paymentMethod} 
+                      onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem value="credit-card" id="credit-card" className="sr-only" />
+                        <Label
+                          htmlFor="credit-card"
+                          className={`flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer ${
+                            formData.paymentMethod === "credit-card" ? "border-primary" : ""
+                          }`}
                         >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 
-              0 5.373 0 12h4zm2 5.291A7.962 
-              7.962 0 014 12H0c0 3.042 1.135 
-              5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                          <CreditCard className="mb-3 h-6 w-6" />
+                          Credit Card
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="paypal" id="paypal" className="sr-only" />
+                        <Label
+                          htmlFor="paypal"
+                          className={`flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer ${
+                            formData.paymentMethod === "paypal" ? "border-primary" : ""
+                          }`}
+                        >
+                          <CreditCard className="mb-3 h-6 w-6" />
+                          PayPal
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="stripe" id="stripe" className="sr-only" />
+                        <Label
+                          htmlFor="stripe"
+                          className={`flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer ${
+                            formData.paymentMethod === "stripe" ? "border-primary" : ""
+                          }`}
+                        >
+                          <CreditCard className="mb-3 h-6 w-6" />
+                          Stripe
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading || alreadyBooked}
+                    className="w-full h-12 text-lg"
+                    size="lg"
+                  >
+                    {alreadyBooked ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 mr-2" />
+                        Already Enrolled
+                      </>
+                    ) : isLoading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                         Processing...
                       </>
-                    )
-                    : `Confirm Payment - $${lesson.price}`}
-              </button>
+                    ) : (
+                      `Confirm Payment - $${lesson.price}`
+                    )}
+                  </Button>
 
-            </form>
+                  {alreadyBooked && (
+                    <p className="text-center text-sm text-muted-foreground">
+                      You are already enrolled in this course. Visit your dashboard to continue learning.
+                    </p>
+                  )}
+                </form>
+              </CardContent>
+              <CardFooter>
+                <div className="w-full text-center">
+                  <p className="text-xs text-muted-foreground">
+                    Your payment is secure and encrypted. By completing this purchase, you agree to our terms of service.
+                  </p>
+                </div>
+              </CardFooter>
+            </Card>
           </div>
         </div>
       </div>

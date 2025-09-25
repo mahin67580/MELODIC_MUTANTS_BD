@@ -1,49 +1,87 @@
+// components/Instructornav.jsx
 "use client"
 import Link from 'next/link'
-import React from 'react'
-import { usePathname } from 'next/navigation' // Import usePathname
+import { usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { 
+  BarChart3, 
+  PlusCircle, 
+  Settings, 
+  User,
+  BookOpen,
+  ChevronRight
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-export default function instructornav() {
-    const pathname = usePathname() // Get current path
-    //console.log(pathname);
+export default function Instructornav() {
+  const pathname = usePathname()
 
-    // Function to check if a link is active
-    const isActive = (path) => {
-        return pathname === path
+  const isActive = (path) => {
+    return pathname.startsWith(path) // Use startsWith to handle nested routes
+  }
+
+  const navItems = [
+    {
+      href: '/instructordashboard/anlytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      description: 'View your course performance'
+    },
+    {
+      href: '/instructordashboard/addcourse',
+      label: 'Add Course',
+      icon: PlusCircle,
+      description: 'Create new course'
+    },
+    {
+      href: '/instructordashboard/managecourse',
+      label: 'Manage Courses',
+      icon: Settings,
+      description: 'Edit existing courses'
+    },
+    {
+      href: '/instructordashboard/updatebio',
+      label: 'Update Profile',
+      icon: User,
+      description: 'Edit your bio and info'
+    },
+    {
+      href: '/instructordashboard/mycourses',
+      label: 'My Courses',
+      icon: BookOpen,
+      description: 'View all your courses'
     }
+  ]
 
-    return (
-        <div>
-            <ul className='flex flex-col gap-4'>
-                <Link
-                    href={'/instructordashboard/anlytics'}
-                    className={`btn ${isActive('/instructordashboard/anlytics') ? 'btn-primary' : ''}`}
-                >
-                    <li>Analytics</li>
-                </Link>
-
-                <Link
-                    href={'/instructordashboard/addcourse'}
-                    className={`btn ${isActive('/instructordashboard/addcourse') ? 'btn-primary' : ''}`}
-                >
-                    <li>Add Course</li>
-                </Link>
-                <Link
-                    href={'/instructordashboard/managecourse'}
-                    className={`btn ${isActive('/instructordashboard/managecourse') ? 'btn-primary' : ''}`}
-                >
-                    <li>Manage Course</li>
-                </Link>
-                <Link
-                    href={'/instructordashboard/updatebio'}
-                    className={`btn ${isActive('/instructordashboard/updatebio') ? 'btn-primary' : ''}`}
-                >
-                    <li>Update Bio</li>
-                </Link>
-
-
-
-            </ul>
-        </div>
-    )
+  return (
+    <nav className="space-y-2">
+      {navItems.map((item) => {
+        const Icon = item.icon
+        const active = isActive(item.href)
+        
+        return (
+          <Button
+            key={item.href}
+            asChild
+            variant={active ? "secondary" : "ghost"}
+            className={cn(
+              "w-full justify-start gap-3 h-14 px-4",
+              active && "bg-blue-50 text-blue-700 border-blue-200 border"
+            )}
+          >
+            <Link href={item.href}>
+              <div className="flex items-center gap-3">
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="font-medium text-sm">{item.label}</div>
+                  <div className="text-xs text-muted-foreground">{item.description}</div>
+                </div>
+              </div>
+              {active && <ChevronRight className="h-4 w-4 ml-auto flex-shrink-0" />}
+            </Link>
+          </Button>
+        )
+      })}
+    </nav>
+  )
 }

@@ -48,7 +48,7 @@ export default async function LessonDetailsPage({ params }) {
                         </div>
 
                         {/* Video Preview Section */}
-                        {lesson.videoPreview && (
+                        {/* {lesson.videoPreview && (
                             <div className="bg-white rounded-lg shadow-md p-6">
                                 <h2 className="text-xl font-bold mb-4">Video Preview</h2>
                                 <div className="aspect-w-16 aspect-h-9">
@@ -62,13 +62,13 @@ export default async function LessonDetailsPage({ params }) {
                                     />
                                 </div>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Description Section */}
                         {(lesson.description || lesson.longDescription) && (
                             <div className="bg-white rounded-lg shadow-md p-6">
                                 <h2 className="text-xl font-bold mb-4">About This Lesson</h2>
-                                <p className="text-gray-700 leading-relaxed">
+                                <p className="text-gray-700 leading-relaxed text-justify">
                                     {lesson.description || lesson.longDescription}
                                 </p>
                             </div>
@@ -125,7 +125,7 @@ export default async function LessonDetailsPage({ params }) {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="text-lg font-semibold">{lesson.instructor.name}</h3>
-                                        <p className="text-gray-700 mt-2">{lesson.instructor.bio}</p>
+                                        <p className="text-gray-700 mt-2 text-justify">{lesson.instructor.bio}</p>
                                     </div>
                                 </div>
                             </div>

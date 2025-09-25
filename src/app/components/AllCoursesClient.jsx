@@ -2,12 +2,18 @@
 import React, { useState } from "react";
 import { Search, Filter, Star } from "lucide-react";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function AllCoursesClient({ courses }) {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("All");
 
-    // Instrument options (matching the previous code)
+    // console.log(courses);
+    // Instrument options
     const instrumentOptions = [
         "Acoustic Guitar",
         "Electric Guitar",
@@ -48,71 +54,74 @@ export default function AllCoursesClient({ courses }) {
     };
 
     return (
-        <div>
+        <div className="  px-4  ">
             {/* Search & Filter Controls */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
                 {/* Search Input */}
                 <div className="relative w-full md:w-1/2">
-                    <Search className="absolute left-3 top-3 text-gray-400" size={18} />
-                    <input
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
                         type="text"
                         placeholder="Search by title..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="pl-10"
                     />
                 </div>
 
-                {/* Filter Dropdown */}
-                <div className="flex items-center gap-2">
-                    <Filter className="text-gray-500" size={18} />
-                    <select
-                        className="border rounded-lg px-3 py-2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                    >
-                        <option value="All">All Instruments</option>
-                        {instrumentOptions.map((instrument, index) => (
-                            <option key={index} value={instrument}>
-                                {instrument}
-                            </option>
-                        ))}
-                    </select>
+                {/* Filter Select */}
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Select value={filter} onValueChange={setFilter}>
+                        <SelectTrigger className="w-full md:w-[180px]">
+                            <SelectValue placeholder="Select instrument" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Instruments</SelectItem>
+                            {instrumentOptions.map((instrument, index) => (
+                                <SelectItem key={index} value={instrument}>
+                                    {instrument}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
             {/* Course Grid */}
             {filteredCourses.length === 0 ? (
-                <p className="text-center text-gray-600">No courses found.</p>
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground text-lg">No courses found.</p>
+                </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6    ">
                     {filteredCourses.map((course) => {
                         const avgRating = getAverageRating(course.ratings);
 
                         return (
-                            <div
-                                key={course._id}
-                                className="rounded-2xl shadow-md hover:shadow-xl transition bg-white"
-                            >
+                            <Card key={course._id} className="overflow-hidden  hover:shadow-lg transition-shadow    pt-0">
                                 {/* Thumbnail */}
-                                <img
-                                    src={course.thumbnail}
-                                    alt={course.title}
-                                    className="w-full h-48 object-cover rounded-t-2xl"
-                                />
+                                <div className=" ">
+                                    <img
+                                        src={course.thumbnail}
+                                        alt={course.title}
+                                        className="w-full h-60 object-cover"
+                                    />
+                                </div>
 
-                                {/* Card Body */}
-                                <div className="p-4 flex flex-col gap-2">
-                                    <h2 className="font-bold text-lg">{course.title}</h2>
-                                    <p className="text-gray-600 text-sm line-clamp-2">
-                                        {course.description || "No description available."}
-                                    </p>
+                                <CardHeader className=" ">
+                                    <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
+                                    <CardDescription className="line-clamp-2 ">
+                                        {course.longDescription || "No description available."}
+                                    </CardDescription>
+                                </CardHeader>
 
+                                <CardContent className=" space-y-3  ">
                                     {/* Instructor */}
                                     {course.instructor?.name && (
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-muted-foreground">
                                             Instructor:{" "}
-                                            <span className="font-medium">
+                                            <span className="font-medium text-foreground">
                                                 {course.instructor.name}
                                             </span>
                                         </p>
@@ -127,34 +136,39 @@ export default function AllCoursesClient({ courses }) {
                                                 className={
                                                     i < Math.round(avgRating)
                                                         ? "text-yellow-500 fill-yellow-500"
-                                                        : "text-gray-300"
+                                                        : "text-muted fill-muted"
                                                 }
                                             />
                                         ))}
-                                        <span className="text-sm text-gray-600 ml-1">
-                                            ({avgRating.toFixed(0)})
+                                        <span className="text-sm text-muted-foreground ml-1">
+                                            ({avgRating.toFixed(1)})
                                         </span>
                                     </div>
 
                                     {/* Extra Info */}
-                                    <div className="flex justify-between items-center text-sm text-gray-500">
-                                        <span>{course.instrument}</span>
-                                        <span>{course.level}</span>
+                                    <div className="flex justify-between items-center">
+                                        <Badge variant="secondary" className="text-xs">
+                                            {course.instrument}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                            {course.level}
+                                        </Badge>
                                     </div>
 
-                                    <p className="font-semibold text-indigo-600">
+                                    {/* Price */}
+                                    <p className="font-semibold text-primary text-lg">
                                         ${course.price}
                                     </p>
+                                </CardContent>
 
-                                    {/* Button */}
-                                    <Link href={`lessons/${course._id}`}>
-                                        <button className="w-full mt-2 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+                                <CardFooter>
+                                    <Button asChild className="w-full">
+                                        <Link href={`lessons/${course._id}`}>
                                             View Details
-                                        </button>
-                                    </Link>
-
-                                </div>
-                            </div>
+                                        </Link>
+                                    </Button>
+                                </CardFooter>
+                            </Card>
                         );
                     })}
                 </div>

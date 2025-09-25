@@ -4,197 +4,221 @@ import logo from '../../public/assets/LOGO1.svg'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
+
+// Shadcn UI Components
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    Sheet,
+    SheetContent,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
+
+// Icons
+import { Menu, User, LogOut, Home, Users, BookOpen, Mail, Info } from 'lucide-react'
 
 export default function Navbar() {
-
-
     const { data: session, status } = useSession()
-    const [isInstructor, setIsInstructor] = useState(false);
+    const [isInstructor, setIsInstructor] = useState(false)
+    const pathname = usePathname()
+
+
 
     useEffect(() => {
         if (status === "authenticated") {
             fetch("/api/instructor/check")
                 .then(res => res.json())
-                .then(data => setIsInstructor(data.isInstructor));
+                .then(data => setIsInstructor(data.isInstructor))
         }
-    }, [status]);
+    }, [status])
 
-    //console.log(session, status);
+    const isActive = (path) => pathname === path
 
+    // Navigation items configuration
+    const navItems = [
+        { href: '/', label: 'Home', icon: Home },
+        { href: '/about', label: 'About', icon: Info },
+        { href: '/contact', label: 'Contact', icon: Mail },
+        { href: '/allcourses', label: 'All Courses', icon: BookOpen },
+        { href: '/instructors', label: 'Instructors', icon: Users },
+    ]
 
-    const pathname = usePathname() // Get current path
+    // Navigation links component
+    const NavLinks = ({ mobile = false, onLinkClick }) => {
+        const LinkWrapper = mobile ? 'div' : Link
 
-    // Function to check if a link is active
-    const isActive = (path) => {
-        return pathname === path
+        return navItems.map((item) => {
+            const IconComponent = item.icon
+            const linkContent = (
+                <div
+                    className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                >
+                    <IconComponent className="h-4 w-4" />
+                    {item.label}
+                </div>
+            )
+
+            return mobile ? (
+                <Button
+                    key={item.href}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    asChild
+                >
+                    <Link href={item.href} onClick={onLinkClick}>
+                        <IconComponent className="h-4 w-4 mr-2" />
+                        {item.label}
+                    </Link>
+                </Button>
+            ) : (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive(item.href)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                    )}
+                >
+                    <IconComponent className="h-4 w-4" />
+                    {item.label}
+                </Link>
+            )
+        })
     }
-
-    const links = () => {
-        return (
-            <>
-                <Link href={'/'}>
-                    <li className={`btn w-30   font-bold rounded-2xl mb-4 lg:mb-0 mr-2 ${isActive('/') ? 'btn-primary' : ''}`}>
-                        Home
-                    </li>
-                </Link>
-                {/* <Link href={'/uploadcourse'}>
-                    <li className={`btn mb-4   font-bold  rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/uploadcourse') ? 'btn-primary' : ''}`}>
-                        Up-course
-                    </li>
-                </Link> */}
-                <Link href={'/about'}>
-                    <li className={`btn mb-4   font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/about') ? 'btn-primary' : ''}`}>
-                        About
-                    </li>
-                </Link>
-                <Link href={'/contact'}>
-                    <li className={`btn mb-4    font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/contact') ? 'btn-primary' : ''}`}>
-                        Contact
-                    </li>
-                </Link>
-                <Link href={'/allcourses'}>
-                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/allcourses') ? 'btn-primary' : ''}`}>
-                        All-Courses
-                    </li>
-                </Link>
-                <Link href={'/instructors'}>
-                    <li className={`btn mb-4  font-bold rounded-2xl lg:mb-0 w-30 mr-2 ${isActive('/instructors') ? 'btn-primary' : ''}`}>
-                        Instructors
-                    </li>
-                </Link>
-                {/* <a href="#comment" className={`btn mb-4 lg:mb-0 w-30 mr-2 ${pathname === '/' ? 'btn-primary' : ''}`}>
-                    Reviews
-                </a> */}
-            </>
-        )
-    }
-
-
 
     const handleSignOut = async () => {
         await signOut({ callbackUrl: '/' })
     }
 
-    // Check if user has an image in session (from social login)
     const userHasImage = session?.user?.image
+    const userInitial = session?.user?.name?.charAt(0).toUpperCase() ||
+        session?.user?.email?.charAt(0).toUpperCase() || 'U'
 
     return (
-        <div className="navbar   backdrop-blur-2xl z-10 top-0 sticky">
-            <div className="navbar-start">
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
-                        </svg>
-                    </div>
-                    <ul
-                        tabIndex={0}
-                        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow">
-                        {links()}
-                    </ul>
-                </div>
-                <Link href={'/'}>
-                    <Image
-                        src={logo}
-                        width={50}
-                        height={50}
-                        alt="Music Note Logo"
-                        className="border-2 border-amber-500 rounded-full transition-transform duration-300 hover:scale-110 hover:shadow-lg"
-                    />
-                </Link>
-            </div>
-            {/* desktop view */}
+        <nav className="sticky  top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="  flex h-16 items-center justify-between px-4 ">
+                {/* Mobile menu */}
+                <div className="flex items-center gap-4 md:hidden">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Menu className="h-5 w-5" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                            <div className="flex flex-col gap-4 py-4">
 
-            <div className='   w-full flex justify-center '>
-                <div className="navbar-center   top-2  lg:flex absolute  flex justify-center hidden    ">
-                    <ul className="menu menu-horizontal bg-base-100 rounded-2xl border-2 shadow-2xl shadow-amber-100 px-10  py-5        ">
-                        {links()}
-                    </ul>
-                </div>
-            </div>
+                                <nav className="flex flex-col gap-2">
+                                    <NavLinks mobile={true} />
+                                </nav>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
 
-            <div className="navbar-end">
-                {status === 'loading' ? (
-                    // Loading state
-                    <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                    </div>
-                ) : status === 'authenticated' ? (
-                    // User is logged in - show profile dropdown
-                    <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn w-full   btn-ghost btn-circle avatar ">
-                            {userHasImage ? (
-                                // Show user's profile image if available
-                                <div className="border-2 border-black  rounded-full ">
-                                    <Image
-                                        src={session.user.image}
-                                        width={40}
-                                        height={40}
-                                        alt="User Profile"
-                                        className="rounded-full"
-                                        onError={(e) => {
-                                            // Fallback to initial if image fails to load
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                    />
-                                    {/* Fallback initial - hidden by default */}
-                                    <div className="w-10  h-10 rounded-full bg-primary text-primary-content flex items-center justify-center border-2 border-black hidden">
-                                        <span className="text-sm font-bold">
-                                            {session?.user?.name?.charAt(0).toUpperCase() ||
-                                                session?.user?.email?.charAt(0).toUpperCase() || 'U'}
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                // Show initial if no image available
-                                <div className="w-10 rounded-full bg-primary   text-primary-content flex items-center justify-center border-2 border-black">
-                                    <span className="text-2xl font-bold      ">
-                                        {session?.user?.name?.charAt(0).toUpperCase() ||
-                                            session?.user?.email?.charAt(0).toUpperCase() || 'U'}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                        <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-md dropdown-content bg-base-100 rounded-box w-52">
-                            <li className="  py-2 border-b">
-                                <div className="font-medium truncate">{session?.user?.name}</div>
-                                <div className="text-xs text-gray-500 truncate">{session?.user?.email}</div>
-                            </li>
-                            <li><Link href="/profile">Profile</Link></li>
-
-                            {/* ✅ Role-based Dashboard */}
-                            {session?.user?.role === "admin" ? (
-                                <li><Link href="/dashboard/admindashboard/anlytics">Dashboard</Link></li>
-                            ) : (
-                                <li><Link href="/dashboard/userdashboard/anlytics">Dashboard</Link></li>
-                            )}
-
-                            {/* ✅ Instructor logic */}
-                            {isInstructor ? (
-                                <li><Link href="/instructordashboard/addcourse">Instructor Dashboard</Link></li>
-                            ) : (
-                                <li><Link href="/instructorregister">Instructor Registration</Link></li>
-                            )}
-
-                            <li className="border-t mt-2">
-                                <button
-                                    onClick={handleSignOut}
-                                    className="btn btn-ghost btn-sm w-full justify-start"
-                                >
-                                    Sign Out
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                ) : (
-                    // User is not logged in - show Get Started button
-                    <Link href={'/register'}>
-                        <button className="btn btn-primary">Get Started</button>
+                    <Link href="/" className="flex items-center gap-2">
+                        <h1 className='text-2xl  hover:scale-105 transition-transform duration-300  hover:rounded-3xl'>𝕸𝖊𝖑𝖔𝖉𝖎𝖈 𝕸𝖚𝖙𝖆𝖓𝖙𝖘</h1>
                     </Link>
-                )}
+                </div>
+
+                {/* Desktop logo */}
+                <div className="hidden md:flex items-center gap-2 ">
+                    <Link href="/">
+                        <h1 className='text-2xl  hover:scale-105 transition-transform duration-300  hover:rounded-3xl'>𝕸𝖊𝖑𝖔𝖉𝖎𝖈 𝕸𝖚𝖙𝖆𝖓𝖙𝖘</h1>
+                    </Link>
+                </div>
+
+                {/* Desktop navigation */}
+                <div className="hidden md:flex items-center  gap-8">
+                    <NavLinks />
+                </div>
+
+                {/* User actions */}
+                <div className="flex items-center gap-4">
+                    {status === 'loading' ? (
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    ) : status === 'authenticated' ? (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-12 w-12   rounded-full">
+                                    <Avatar className="h-12 w-12 border-2 border-foreground">
+                                        {userHasImage ? (
+                                            <AvatarImage src={session?.user?.image} alt={session?.user?.name} />
+                                        ) : null}
+                                        <AvatarFallback className="bg-primary  text-primary-foreground">
+                                            {userInitial}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium leading-none">{session.user.name}</p>
+                                        <p className="text-xs leading-none text-muted-foreground">
+                                            {session.user.email}
+                                        </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <Link href="/profile">Profile</Link>
+                                </DropdownMenuItem>
+
+                                {/* Role-based Dashboard */}
+                                <DropdownMenuItem asChild>
+                                    <Link href={
+                                        session.user.role === "admin"
+                                            ? "/dashboard/admindashboard/anlytics"
+                                            : "/dashboard/userdashboard/anlytics"
+                                    }>
+                                        Dashboard
+                                    </Link>
+                                </DropdownMenuItem>
+
+                                {/* Instructor logic */}
+                                <DropdownMenuItem asChild>
+                                    <Link href={
+                                        isInstructor
+                                            ? "/instructordashboard/addcourse"
+                                            : "/instructorregister"
+                                    }>
+                                        {isInstructor ? "Instructor Dashboard" : "Become Instructor"}
+                                    </Link>
+                                </DropdownMenuItem>
+
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={handleSignOut}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Sign out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Button asChild>
+                            <Link href="/register">Get Started</Link>
+                        </Button>
+                    )}
+                </div>
             </div>
-        </div>
+        </nav>
     )
 }

@@ -1,28 +1,34 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 
 // Helper: convert Google Drive link to embeddable preview link
 function getEmbedUrl(url) {
   if (!url) return "";
-  const driveMatch = url.match(/\/d\/(.*?)(\/|$)/); // extract FILE_ID
+  const driveMatch = url.match(/\/d\/(.*?)(\/|$)/);
   if (driveMatch) {
     const fileId = driveMatch[1];
     return `https://drive.google.com/file/d/${fileId}/preview`;
   }
-  return url; // return original (works for YouTube, Vimeo, etc.)
+  return url;
 }
 
 export default function VideoPlayer({ pasCourses, modules }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [openMilestone, setOpenMilestone] = useState(0); // first milestone open by default
+  const [openMilestone, setOpenMilestone] = useState("0");
 
   const currentVideo = getEmbedUrl(modules[currentIndex]?.video);
+  const currentModule = modules[currentIndex];
 
   // Precompute a mapping from milestone modules to global module index
   const moduleIndexMap = useMemo(() => {
     const map = new Map();
     modules.forEach((mod, idx) => {
-      map.set(`${mod.title}||${mod.video}`, idx); // unique key
+      map.set(`${mod.title}||${mod.video}`, idx);
     });
     return map;
   }, [modules]);
@@ -37,7 +43,7 @@ export default function VideoPlayer({ pasCourses, modules }) {
             moduleIndexMap.get(`${mod.title}||${mod.video}`) === currentIndex
         )
       ) {
-        return mIndex;
+        return mIndex.toString();
       }
     }
     return null;
@@ -50,14 +56,12 @@ export default function VideoPlayer({ pasCourses, modules }) {
     }
   }, [activeMilestoneIndex]);
 
-  // Move to next video
   const playNext = () => {
     if (currentIndex < modules.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   };
 
-  // Move to previous video
   const playPrev = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
@@ -65,97 +69,147 @@ export default function VideoPlayer({ pasCourses, modules }) {
   };
 
   return (
-    <div>
-      {/* Video Player */}
-      <div className="aspect-w-16 aspect-h-9 mb-6">
-        <iframe
-          key={currentVideo} // force reload when video changes
-          src={currentVideo}
-          title={modules[currentIndex]?.title || "Course Video"}
-          className="w-full h-64 lg:h-96 rounded-lg"
-          frameBorder="0"
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-          allowFullScreen
-        />
+    <div className="space-y-6">
+      {/* Current Video Info */}
+      <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-blue-900">Now Playing</h3>
+            <p className="text-blue-800 text-sm mt-1">{currentModule?.title || "No title"}</p>
+          </div>
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            {currentIndex + 1} of {modules.length}
+          </Badge>
+        </div>
       </div>
 
-      {/* Controls */}
-      <div className="flex gap-4 mb-6">
-        <button
+      {/* Video Player */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="aspect-w-19 aspect-h-9">
+            <iframe
+              key={currentVideo}
+              src={currentVideo}
+              title={currentModule?.title || "Course Video"}
+              className="w-full h-64 border-2 sm:h-80 lg:h-96 rounded-t-lg"
+              frameBorder="0"
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Navigation Controls */}
+      <div className="flex justify-between items-center">
+        <Button
           onClick={playPrev}
           disabled={currentIndex === 0}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
         >
-          Prev
-        </button>
-        <button
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        
+        <div className="text-sm text-gray-600">
+          Module {currentIndex + 1} of {modules.length}
+        </div>
+        
+        <Button
           onClick={playNext}
           disabled={currentIndex === modules.length - 1}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
         >
           Next
-        </button>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Accordion Style Milestones */}
-      <div className="space-y-4">
-        {pasCourses?.map((milestone, mIndex) => {
-          const isActive = mIndex === activeMilestoneIndex;
+      {/* Course Content Accordion */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Course Content</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" value={openMilestone} onValueChange={setOpenMilestone} className="space-y-2">
+            {pasCourses?.map((milestone, mIndex) => {
+              const milestoneIndex = mIndex.toString();
+              const isActive = milestoneIndex === activeMilestoneIndex;
 
-          return (
-            <div
-              key={mIndex}
-              className={`border rounded-lg ${
-                isActive ? "border-blue-500 bg-blue-50" : "border-gray-200"
-              }`}
-            >
-              {/* Accordion Header */}
-              <button
-                onClick={() =>
-                  setOpenMilestone(openMilestone === mIndex ? null : mIndex)
-                }
-                className={`w-full flex justify-between items-center px-4 py-2 rounded-t-lg ${
-                  isActive ? "font-bold text-blue-700" : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                <span>{milestone.title}</span>
-                <span>{openMilestone === mIndex ? "▲" : "▼"}</span>
-              </button>
+              return (
+                <AccordionItem
+                  key={mIndex}
+                  value={milestoneIndex}
+                  className={`border rounded-lg ${
+                    isActive ? "border-blue-300 bg-blue-50" : "border-gray-200"
+                  }`}
+                >
+                  <AccordionTrigger className={`px-4 hover:no-underline ${
+                    isActive ? "bg-blue-100 rounded-t-lg" : ""
+                  }`}>
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        isActive ? "bg-blue-600" : "bg-gray-400"
+                      }`}></div>
+                      <span className={`font-medium ${
+                        isActive ? "text-blue-900" : "text-gray-900"
+                      }`}>
+                        {milestone.title}
+                      </span>
+                      <Badge variant="secondary" className="ml-2">
+                        {milestone.modules?.length || 0} modules
+                      </Badge>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-0">
+                    <div className="space-y-2 py-2">
+                      {milestone.modules?.map((mod, i) => {
+                        const globalIndex = moduleIndexMap.get(`${mod.title}||${mod.video}`) ?? 0;
+                        const isCurrent = globalIndex === currentIndex;
 
-              {/* Accordion Content */}
-              {openMilestone === mIndex && (
-                <ul className="p-4 space-y-2 bg-white">
-                  {milestone.modules?.map((mod, i) => {
-                    const globalIndex =
-                      moduleIndexMap.get(`${mod.title}||${mod.video}`) ?? 0;
-
-                    return (
-                      <li
-                        key={i}
-                        className="flex justify-between items-center border-b pb-2"
-                      >
-                        <span
-                          className={
-                            globalIndex === currentIndex ? "font-bold text-blue-700" : ""
-                          }
-                        >
-                          {mod.title}
-                        </span>
-                        <button
-                          onClick={() => setCurrentIndex(globalIndex)}
-                          className="text-blue-600 hover:underline text-sm"
-                        >
-                          Watch
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                        return (
+                          <div
+                            key={i}
+                            className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                              isCurrent
+                                ? "bg-blue-100 border border-blue-200"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                isCurrent ? "bg-blue-600" : "bg-gray-300"
+                              }`}></div>
+                              <span className={`text-sm ${
+                                isCurrent ? "text-blue-900 font-medium" : "text-gray-700"
+                              }`}>
+                                {mod.title}
+                              </span>
+                            </div>
+                            <Button
+                              onClick={() => setCurrentIndex(globalIndex)}
+                              variant={isCurrent ? "default" : "outline"}
+                              size="sm"
+                              className="flex items-center gap-2 h-8"
+                            >
+                              <Play className="h-3 w-3" />
+                              {isCurrent ? "Playing" : "Play"}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </CardContent>
+      </Card>
     </div>
   );
 }
