@@ -4,11 +4,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { signIn } from "next-auth/react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Loader2, Upload, User, Mail, Lock, BookOpen, Award, Calendar } from "lucide-react";
 
 export default function InstructorRegisterPage() {
-
-  const { data: session, status } = useSession()
-  // console.log(session?.user?.email);
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   const [form, setForm] = useState({
@@ -22,11 +27,10 @@ export default function InstructorRegisterPage() {
     image: "",
   });
 
-  const [loading, setLoading] = useState(false); // register button
-  const [uploading, setUploading] = useState(false); // image uploading
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Instrument options
   const instrumentOptions = [
     "Acoustic Guitar",
     "Electric Guitar",
@@ -49,12 +53,14 @@ export default function InstructorRegisterPage() {
     "Digital Music Production"
   ];
 
-  // handle form inputs
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // upload profile image to Cloudinary
+  const handleSelectChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -86,7 +92,6 @@ export default function InstructorRegisterPage() {
     }
   };
 
-  // submit instructor data
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -112,15 +117,14 @@ export default function InstructorRegisterPage() {
           achievements: "",
           image: "",
         });
-        
-        router.push('/instructordashboard/addcourse')
+
+        router.push('/instructordashboard/addcourse');
         Swal.fire({
           icon: "success",
           title: "Success!",
           text: "Instructor registered successfully 🎉",
           confirmButtonColor: "#3085d6",
         });
-
       } else {
         Swal.fire({
           icon: "error",
@@ -141,160 +145,235 @@ export default function InstructorRegisterPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Register as Instructor</h1>
+    <div
+      className="min-h-screen py-12 px-4 relative flex justify-end lg:pr-28"
+      style={{
+        backgroundImage: "url('/bg2.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/ backdrop-blur-sm"></div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-2xl p-6 space-y-4"
-      >
-        {/* Name */}
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Full Name"
-          className="w-full border rounded p-2"
-          required
-        />
+      <div className="max-w-lg   relative z-10  ">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-3xl font-bold bg-black bg-clip-text text-transparent">
+              𝔅𝔢𝔠𝔬𝔪𝔢 𝔞𝔫 ℑ𝔫𝔰𝔱𝔯𝔲𝔠𝔱𝔬𝔯
+            </CardTitle>
+            <CardDescription className="text-lg text-gray-600">
+              Share your musical expertise with aspiring musicians
+            </CardDescription>
+          </CardHeader>
 
-        {/* Email */}
-        <input
-          type="email"
-          name="email"
-          disabled
-          defaultValue={session?.user?.email}
-          placeholder="Email"
-          className="w-full border rounded p-2"
-        />
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name */}
+              <div className="flex flex-col lg:flex-row gap-5 justify-between">
 
-        {/* Password */}
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Password"
-          className="w-full border rounded p-2"
-          required
-        />
 
-        {/* Bio */}
-        <textarea
-          name="bio"
-          value={form.bio}
-          onChange={handleChange}
-          placeholder="Short Bio"
-          rows="3"
-          className="w-full border rounded p-2"
-          required
-        />
+                <div className="space-y-2">
+                  <Label htmlFor="name" className=" ">
+                    <User className="h-4 w-4" />
+                    Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name"
+                    required
+                    className="h-11 lg:w-56"
+                  />
+                </div>
 
-        {/* Instrument & Experience */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          {/* Instrument Dropdown */}
-          <select
-            name="instrument"
-            value={form.instrument}
-            onChange={handleChange}
-            className="border rounded p-2"
-            required
-          >
-            <option value="">Select Instrument</option>
-            {instrumentOptions.map((instrument, index) => (
-              <option key={index} value={instrument}>
-                {instrument}
-              </option>
-            ))}
-          </select>
-          
-          <input
-            type="number"
-            name="experienceYears"
-            value={form.experienceYears}
-            onChange={handleChange}
-            placeholder="Years of Experience"
-            className="border rounded p-2"
-            required
-          />
-        </div>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className=" ">
+                    <Mail className="h-4 w-4" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    disabled
+                    defaultValue={session?.user?.email}
+                    placeholder="Your email"
+                    className="h-11 lg:w-56  bg-gray-100"
+                  />
+                </div>
+              </div>
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Create a secure password"
+                  required
+                  className="h-11"
+                />
+              </div>
 
-        {/* Achievements */}
-        <textarea
-          name="achievements"
-          value={form.achievements}
-          onChange={handleChange}
-          placeholder="Achievements (comma-separated)"
-          rows="2"
-          className="w-full border rounded p-2"
-        />
+              {/* Bio */}
+              <div className="space-y-2">
+                <Label htmlFor="bio" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Bio
+                </Label>
+                <Textarea
+                  id="bio"
+                  name="bio"
+                  value={form.bio}
+                  onChange={handleChange}
+                  placeholder="Tell us about your musical journey and teaching philosophy..."
+                  rows="3"
+                  required
+                />
+              </div>
 
-        {/* Profile Image Upload */}
-        <div>
-          <label className="block font-medium mb-1">Profile Image</label>
-          <label className="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded-lg inline-block hover:bg-blue-700 transition-colors">
-            {uploading ? "Uploading..." : "Upload Image"}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
+              {/* Instrument & Experience */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Instrument */}
+                <div className="space-y-2">
+                  <Label htmlFor="instrument">Primary Instrument</Label>
+                  <Select
+                    value={form.instrument}
+                    onValueChange={(value) => handleSelectChange("instrument", value)}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Select instrument" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {instrumentOptions.map((instrument, index) => (
+                        <SelectItem key={index} value={instrument}>
+                          {instrument}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {uploading && (
-            <div className="mt-2 text-blue-600 flex items-center gap-2">
-              <svg
-                className="animate-spin h-5 w-5 text-blue-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+                {/* Experience */}
+                <div className="space-y-2">
+                  <Label htmlFor="experienceYears" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Experience (Years)
+                  </Label>
+                  <Input
+                    id="experienceYears"
+                    name="experienceYears"
+                    type="number"
+                    value={form.experienceYears}
+                    onChange={handleChange}
+                    placeholder="Years"
+                    required
+                    className="h-11"
+                  />
+                </div>
+              </div>
+
+              {/* Achievements */}
+              <div className="space-y-2">
+                <Label htmlFor="achievements" className="flex items-center gap-2">
+                  <Award className="h-4 w-4" />
+                  Achievements
+                </Label>
+                <Textarea
+                  id="achievements"
+                  name="achievements"
+                  value={form.achievements}
+                  onChange={handleChange}
+                  placeholder="Notable achievements, awards, or performances (comma-separated)"
+                  rows="2"
+                />
+              </div>
+
+              {/* Profile Image Upload */}
+              <div className="space-y-3">
+                <Label>Profile Image</Label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="relative">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                      disabled={uploading}
+                    />
+                    <Label
+                      htmlFor="image-upload"
+                      className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${uploading
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                        }`}
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      {uploading ? "Uploading..." : "Choose Image"}
+                    </Label>
+                  </div>
+
+                  {form.image && !uploading && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={form.image}
+                        alt="Profile preview"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-blue-200"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {uploading && (
+                  <div className="flex items-center gap-2 text-blue-600 text-sm">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Uploading image...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={loading || uploading}
+                className="w-full h-12 text-lg font-semibold bg-black "
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-              <span>Uploading image...</span>
-            </div>
-          )}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  "Complete Registration"
+                )}
+              </Button>
+            </form>
 
-          {form.image && !uploading && (
-            <div className="mt-2">
-              <img
-                src={form.image}
-                alt="Instructor profile"
-                className="w-32 h-32 object-cover rounded-lg shadow"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading || uploading}
-          className={`w-full py-2 rounded-lg transition ${loading || uploading
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-600 text-white hover:bg-green-700"
-            }`}
-        >
-          {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
-
-      {message && <p className="mt-4 text-center">{message}</p>}
+            {message && (
+              <div className={`mt-4 p-3 rounded-lg text-center text-sm ${message.includes("✅") ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                }`}>
+                {message}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
