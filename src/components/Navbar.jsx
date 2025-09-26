@@ -214,7 +214,7 @@ export default function Navbar() {
                         </DropdownMenu>
                     ) : (
                         <Button asChild>
-                            <Link href="/register">Get Started</Link>
+                            <Link href="/login">Get Started</Link>
                         </Button>
                     )}
                 </div>
