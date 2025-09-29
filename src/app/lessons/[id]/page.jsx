@@ -24,7 +24,7 @@ export default async function LessonDetailsPage({ params }) {
             )
         }
 
-        console.log(lesson);
+        //console.log(lesson);
 
 
 

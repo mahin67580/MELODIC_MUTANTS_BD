@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Eye, EyeOff, Mail, Lock, User, UserPlus } from "lucide-react"
-import bgImage from "../../../src/assets/bgimg.jpg"
+// import bgImage from "../../../src/assets/bgimg.jpg"
 
 export default function Register() {
   const router = useRouter()
@@ -39,7 +39,7 @@ export default function Register() {
 
     try {
       const res = await RegisterUser(formData)
-      console.log("Response:", res)
+      //console.log("Response:", res)
 
       if (res.success) {
         // Show success alert
@@ -147,7 +147,7 @@ export default function Register() {
     <div
       className="min-h-screen flex items-center justify-center p-4 relative"
       style={{
-        backgroundImage: `url(${bgImage.src})`,
+        backgroundImage: "url('/bgimg.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',

@@ -75,7 +75,7 @@ export default async function CourseDetailPage({ params }) {
 
     const course = await getCourseData(id, session.user.email);
 
-    console.log(course);
+    //console.log(course);
 
     if (!course) {
         return (
