@@ -24,6 +24,7 @@ export default async function InstructorDetailPage({ params }) {
         _id: new ObjectId(id),
     });
 
+    // console.log(instructor);
     if (!instructor) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-10 text-center">
@@ -134,10 +135,18 @@ export default async function InstructorDetailPage({ params }) {
                                         Achievements
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground">
-                                        {instructor.achievements}
-                                    </p>
+                                <CardContent className="flex justify-center flex-wrap gap-4">
+                                    {instructor.achievements
+                                        .split(",")
+                                        .map((achievement, index) => (
+                                            <div
+                                                key={index}
+                                                className="p-4 rounded-2xl shadow bg-white border text-center 
+                   transition transform hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r from-primary/10 to-primary/5"
+                                            >
+                                                <p className="text-sm text-gray-700">{achievement.trim()}</p>
+                                            </div>
+                                        ))}
                                 </CardContent>
                             </Card>
                         </section>
@@ -227,7 +236,7 @@ export default async function InstructorDetailPage({ params }) {
                     <Instructorcourse courses={courses} />
                 ) : (
                     <Card>
-                        <CardContent className="pt-6">
+                        <CardContent className="pt-6 ">
                             <div className="text-center py-8">
                                 <div className="text-6xl mb-4">📚</div>
                                 <h3 className="text-xl font-semibold mb-2">No Courses Available</h3>

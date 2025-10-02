@@ -52,34 +52,31 @@ export default function InstructorCourseManage({ courses }) {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 ">
             {/* Desktop Table View */}
             <div className="hidden lg:block">
 
 
-                <Table className={'border-2'}>
+                <Table className={'border-2 '}>
                     <TableHeader>
-                        <TableRow >
+                        <TableRow   >
+                           
                             <TableHead className="text-center">Course</TableHead>
                             <TableHead className="text-center">Instrument</TableHead>
                             <TableHead className="text-center">Price</TableHead>
                             <TableHead className="text-center">Students</TableHead>
                             <TableHead className="text-center">Actions</TableHead>
-                            <TableHead className="text-center">Actions</TableHead>
+                            <TableHead className="text-center">Avatar</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {courseList.map((course) => (
                             <TableRow key={course._id}>
+                                 
                                 <TableCell>
                                     <div className="  ">
-                                        {/* <Avatar className="h-30 w-30">
-                                            <AvatarImage src={course.thumbnail} alt={course.title} />
-                                            <AvatarFallback>
-                                                {getInitials(course.title)}
-                                            </AvatarFallback>
-                                        </Avatar> */}
-                                        <div className="text-center">
+                                         
+                                        <div className="text-center ">
                                             <div className="font-medium">{course.title}</div>
                                             <div className="text-sm text-muted-foreground line-clamp-1">
                                                 {course.description?.substring(0, 50)}...

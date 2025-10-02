@@ -32,6 +32,7 @@ export const collectionNamesObj = {
   userCollection: "users",
   instructorCollection: "instructors",
   bookingCollection: "bookings",
+  progressBarCollection:"progressbar"
 };
 
 export async function dbConnect(collectionName) {

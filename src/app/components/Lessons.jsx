@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import LessonActionButton from "./LessonActionButton";
 
 export default async function Lessons() {
   const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
@@ -105,12 +106,7 @@ export default async function Lessons() {
                 </CardContent>
 
                 <CardFooter>
-                  <Button asChild variant="outline" className="w-full group/btn">
-                    <Link href={`/lessons/${lesson._id}`} className="flex items-center gap-2">
-                      <span>View Lesson</span>
-                      <FaArrowRightToBracket className="w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
-                    </Link>
-                  </Button>
+                    <LessonActionButton lessonId={lesson._id.toString()} />
                 </CardFooter>
               </Card>
             );

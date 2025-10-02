@@ -9,7 +9,7 @@ export default function ClientLayout({ children, session = { session }, isInstru
 
 
   const hiddenPaths = ["/dashboard", "/instructordashboard"];
-  const hideNavbar = hiddenPaths.some(path => pathname.startsWith(path));
+  const hideNavbar = hiddenPaths.some(path => pathname?.startsWith(path));
 
   return (
     <>

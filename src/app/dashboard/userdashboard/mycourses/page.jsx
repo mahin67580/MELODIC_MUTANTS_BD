@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import Swal from 'sweetalert2'
+import CourseActionButton from '@/app/components/CourseActionButton'
 
 export default function MyCoursesPage() {
     const [courses, setCourses] = useState([])
@@ -33,6 +34,33 @@ export default function MyCoursesPage() {
         }
     }
 
+    // Format progress percentage with proper rounding
+    const formatProgress = (progress) => {
+        return Math.round(progress)
+    }
+
+    // Get progress color based on percentage
+    const getProgressColor = (progress) => {
+        if (progress >= 80) return 'bg-green-600'
+        if (progress >= 50) return 'bg-blue-600'
+        if (progress >= 25) return 'bg-yellow-500'
+        return 'bg-gray-400'
+    }
+
+    // Format last watched date
+    const formatLastWatched = (dateString) => {
+        if (!dateString) return 'Not started'
+        const date = new Date(dateString)
+        const now = new Date()
+        const diffTime = Math.abs(now - date)
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+        if (diffDays === 1) return 'Yesterday'
+        if (diffDays < 7) return `${diffDays} days ago`
+        if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
+        return date.toLocaleDateString()
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -60,8 +88,8 @@ export default function MyCoursesPage() {
                         </div>
                         <h2 className="text-xl font-semibold text-gray-700 mb-2">No courses yet</h2>
                         <p className="text-gray-500 mb-4">You haven't enrolled in any courses yet.</p>
-                        <Link 
-                            href="/lessons" 
+                        <Link
+                            href="/lessons"
                             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                             Browse Courses
@@ -71,7 +99,7 @@ export default function MyCoursesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {courses.map((course) => (
                             <Link key={course._id} href={`/dashboard/userdashboard/mycourses/${course._id}`}>
-                                <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer h-full">
+                                <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer h-full flex flex-col">
                                     <div className="relative w-full h-48">
                                         <Image
                                             src={course.thumbnail || '/placeholder-course.jpg'}
@@ -79,39 +107,80 @@ export default function MyCoursesPage() {
                                             fill
                                             className="object-cover"
                                         />
-                                        <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded text-sm font-semibold">
+                                        <div
+                                            className={`absolute top-2 right-2 text-white px-2 py-1 rounded text-sm font-semibold 
+    ${course.level === "Advanced" ? "bg-red-600" :
+                                                    course.level === "Intermediate" ? "bg-yellow-600" :
+                                                        course.level === "Beginner" ? "bg-green-600" : "bg-gray-600"}`}
+                                        >
                                             {course.level}
                                         </div>
+
+
+                                        {/* Progress overlay on image */}
+                                        {/* {course.progress > 0 && (
+                                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                                <div className="flex justify-between items-center text-xs mb-1">
+                                                    <span>Progress</span>
+                                                    <span>{formatProgress(course.progress)}%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-600 rounded-full h-1.5">
+                                                    <div 
+                                                        className={`h-1.5 rounded-full ${getProgressColor(course.progress)} transition-all duration-300`}
+                                                        style={{ width: `${course.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        )} */}
                                     </div>
-                                    <div className="p-4">
+
+                                    <div className="p-4 flex-1 flex flex-col">
                                         <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
                                             {course.title}
                                         </h3>
                                         <p className="text-gray-600 text-sm mb-3">
-                                            Instructor : {course.instructor?.name || 'Unknown Instructor'}
+                                            Instructor: {course.instructor?.name || 'Unknown Instructor'}
                                         </p>
-                                        
-                                        {/* <div className="flex justify-between items-center mb-3">
-                                            <span className="text-sm text-gray-500">
-                                                {course.duration} minutes
-                                            </span>
-                                            <span className="text-sm font-semibold text-green-600">
-                                                ${course.price}
-                                            </span>
-                                        </div> */}
 
-                            
-
-                                        <div className="mt-4 pt-3 border-t border-gray-100">
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div 
-                                                    className="bg-blue-600 h-2 rounded-full" 
-                                                    style={{ width: `${course.progress || 0}%` }}
-                                                ></div>
+                                        {/* Progress Details */}
+                                        <div className="mt-auto space-y-3">
+                                            {/* Main Progress Bar */}
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-600">Course Progress</span>
+                                                    <span className="font-semibold text-blue-600">
+                                                        {formatProgress(course.progress)}%
+                                                    </span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div
+                                                        className={`h-2 rounded-full ${getProgressColor(course.progress)} transition-all duration-300`}
+                                                        style={{ width: `${course.progress}%` }}
+                                                    ></div>
+                                                </div>
                                             </div>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                {course.progress || 0}% complete
-                                            </p>
+
+                                            {/* Modules Completion */}
+                                            <div className="flex justify-between items-center text-xs text-gray-500">
+                                                <span>
+                                                    {course.completedModules} of {course.totalModules} modules completed
+                                                </span>
+                                            </div>
+
+                                            {/* Last Activity */}
+                                            {course.lastWatched && (
+                                                <div className="text-xs text-gray-400">
+                                                    Last activity: {formatLastWatched(course.lastWatched)}
+                                                </div>
+                                            )}
+
+                                            {/* Continue/Start Button */}
+                                            <div className="pt-2">
+
+                                           <CourseActionButton course={course} />
+
+
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

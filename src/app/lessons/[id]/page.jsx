@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import React from 'react'
 import Link from 'next/link'
+import EnrollButton from '@/app/components/EnrollButton'
 
 export default async function LessonDetailsPage({ params }) {
     const { id } = await params
@@ -217,15 +218,7 @@ export default async function LessonDetailsPage({ params }) {
 
 
                             {/* Checkout Button */}
-                            <Link
-                                href={`/chechout/${lesson._id || id}`}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                            >
-                                <span>Enroll Now</span>
-                                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </Link>
+                          <EnrollButton lessonId={lesson._id || id} />
 
                             {/* Lesson Details */}
                             <div className="space-y-3 pt-4 border-t border-gray-200">

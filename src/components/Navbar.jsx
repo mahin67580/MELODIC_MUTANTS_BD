@@ -1,6 +1,5 @@
 "use client"
-import Image from 'next/image'
-import logo from '../../public/assets/LOGO1.svg'
+
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
@@ -34,7 +33,7 @@ export default function Navbar() {
     const pathname = usePathname()
 
 
-
+ 
     useEffect(() => {
         if (status === "authenticated") {
             fetch("/api/instructor/check")
