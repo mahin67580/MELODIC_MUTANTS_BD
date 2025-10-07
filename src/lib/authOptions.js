@@ -94,5 +94,5 @@ export const authOptions = {
     strategy: "jwt",
   },
   // Enable debug mode in development for better error tracking
-  debug: process.env.NODE_ENV === "development",
+  //debug: process.env.NODE_ENV === "development",
 };

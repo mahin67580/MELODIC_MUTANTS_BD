@@ -15,7 +15,7 @@ export default async function AllCoursesPage() {
 
   return (
     <div className="min-h-screen p-6 md:p-12 bg-gray-50">
-      <h1 className="text-3xl font-bold text-center mb-8">🎸 All Courses</h1>
+      <h1 className=" text-4xl lg:text-6xl font-bold text-center mb-8">🎸 𝕬𝖑𝖑 𝕮𝖔𝖚𝖗𝖘𝖊𝖘</h1>
       <AllCoursesClient courses={courses} />
     </div>
   );

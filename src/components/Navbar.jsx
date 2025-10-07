@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
 // Icons
-import { Menu, User, LogOut, Home, Users, BookOpen, Mail, Info } from 'lucide-react'
+import { Menu, User, LogOut, Home, Users, BookOpen, Mail, Info, Wrench  } from 'lucide-react'
 
 export default function Navbar() {
     const { data: session, status } = useSession()
@@ -33,7 +33,7 @@ export default function Navbar() {
     const pathname = usePathname()
 
 
- 
+
     useEffect(() => {
         if (status === "authenticated") {
             fetch("/api/instructor/check")
@@ -48,6 +48,7 @@ export default function Navbar() {
     const navItems = [
         { href: '/', label: 'Home', icon: Home },
         { href: '/about', label: 'About', icon: Info },
+        { href: '/handytools', label: 'Tools', icon: Wrench },
         { href: '/contact', label: 'Contact', icon: Mail },
         { href: '/allcourses', label: 'All Courses', icon: BookOpen },
         { href: '/instructors', label: 'Instructors', icon: Users },
@@ -189,7 +190,7 @@ export default function Navbar() {
                                             ? "/dashboard/admindashboard/anlytics"
                                             : "/dashboard/userdashboard/anlytics"
                                     }>
-                                        Dashboard
+                                        {session.user.role === "admin" ? "Admin Dashboard" : "User Dashboard"}
                                     </Link>
                                 </DropdownMenuItem>
 
@@ -200,7 +201,11 @@ export default function Navbar() {
                                             ? "/instructordashboard/addcourse"
                                             : "/instructorregister"
                                     }>
-                                        {isInstructor ? "Instructor Dashboard" : "Become Instructor"}
+                                        {isInstructor
+                                            ? "Instructor Dashboard"
+                                            : session.user.role === "admin"
+                                                ? ""
+                                                : "Become Instructor"}
                                     </Link>
                                 </DropdownMenuItem>
 

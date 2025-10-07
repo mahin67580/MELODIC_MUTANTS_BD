@@ -390,7 +390,7 @@ function safeConvertToPlainObject(doc) {
 }
 
 async function getCourseData(courseId, userEmail) {
-    console.log(courseId);
+   // console.log(courseId);
     try {
         const bookingCollection = await dbConnect(
             collectionNamesObj.bookingCollection
@@ -642,6 +642,7 @@ export default async function CourseDetailPage({ params }) {
                                 userId={session.user.email}
                                 courseId={courseId}
                                 initialProgress={plainUserProgress}
+                                courseData={course} 
                             />
                         </div>
 
@@ -718,16 +719,16 @@ export default async function CourseDetailPage({ params }) {
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 bg-white rounded-lg shadow-lg p-6 space-y-6">
 
-                            <h3 className="text-lg font-bold">Course Progress</h3>
+                            {/* <h3 className="text-lg font-bold">Course Progressss</h3>
                             <div className="w-full bg-gray-200 rounded-full h-4">
                                 <div
                                     className="bg-blue-600 h-4 rounded-full transition-all duration-300"
                                     style={{ width: `${overallProgress}%` }}
                                 ></div>
-                            </div>
-                            <p className="text-sm text-gray-600">
+                            </div> */}
+                            {/* <p className="text-sm text-gray-600">
                                 {completedModules} of {totalModules} modules completed ({overallProgress}%)
-                            </p>
+                            </p> */}
 
                             {/* Milestone Progress */}
                             <div className="pt-4 border-t border-gray-200">
