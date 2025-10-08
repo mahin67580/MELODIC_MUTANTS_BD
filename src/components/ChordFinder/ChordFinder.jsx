@@ -8,428 +8,367 @@ const ChordFinder = () => {
   const [chordType, setChordType] = useState('major');
   const [instrument, setInstrument] = useState('piano');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioContext, setAudioContext] = useState(null);
-  
+
   // Audio references
-  const audioRefs = useRef([]);
-  
+  const audioRefs = useRef(null);
+
   // Notes and chord types
   const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const chordTypes = [
     { value: 'major', name: 'Major' },
-    { value: 'minor', name: 'Minor' },
-    { value: 'diminished', name: 'Diminished' },
-    { value: 'augmented', name: 'Augmented' },
-    { value: 'major7', name: 'Major 7th' },
-    { value: 'minor7', name: 'Minor 7th' },
-    { value: 'dominant7', name: 'Dominant 7th' },
-    { value: 'sus2', name: 'Suspended 2nd' },
-    { value: 'sus4', name: 'Suspended 4th' }
+    { value: 'minor', name: 'Minor' }
+    // You can add others if you have sound files for them
   ];
 
-  // Chord formulas (intervals in semitones from root)
+  // Get chord notes for display only (based on intervals)
   const chordFormulas = {
     major: [0, 4, 7],
     minor: [0, 3, 7],
-    diminished: [0, 3, 6],
-    augmented: [0, 4, 8],
-    major7: [0, 4, 7, 11],
-    minor7: [0, 3, 7, 10],
-    dominant7: [0, 4, 7, 10],
-    sus2: [0, 2, 7],
-    sus4: [0, 5, 7]
   };
-
-  // Guitar chord fingerings database
-  const guitarChords = {
-    'C': {
-      'major': { frets: [0, 3, 2, 0, 1, 0], fingers: ['x', '3', '2', 'x', '1', 'x'] },
-      'minor': { frets: [0, 3, 3, 0, 1, 0], fingers: ['x', '3', '4', 'x', '1', 'x'] },
-      'major7': { frets: [0, 3, 2, 4, 1, 0], fingers: ['x', '3', '2', '4', '1', 'x'] }
-    },
-    'C#': {
-      'major': { frets: [1, 4, 3, 1, 2, 1], fingers: ['1', '4', '3', '1', '2', '1'] },
-      'minor': { frets: [1, 4, 4, 1, 2, 1], fingers: ['1', '4', '4', '1', '2', '1'] }
-    },
-    'D': {
-      'major': { frets: [2, 0, 0, 2, 3, 2], fingers: ['2', 'x', 'x', '1', '3', '2'] },
-      'minor': { frets: [2, 0, 0, 2, 3, 1], fingers: ['2', 'x', 'x', '1', '3', '1'] },
-      'major7': { frets: [2, 0, 0, 2, 2, 2], fingers: ['2', 'x', 'x', '1', '1', '1'] }
-    },
-    'D#': {
-      'major': { frets: [3, 1, 1, 3, 4, 3], fingers: ['3', '1', '1', '2', '4', '3'] },
-      'minor': { frets: [3, 1, 1, 3, 4, 2], fingers: ['3', '1', '1', '2', '4', '1'] }
-    },
-    'E': {
-      'major': { frets: [0, 2, 2, 1, 0, 0], fingers: ['x', '2', '3', '1', 'x', 'x'] },
-      'minor': { frets: [0, 2, 2, 0, 0, 0], fingers: ['x', '2', '3', 'x', 'x', 'x'] },
-      'major7': { frets: [0, 2, 1, 1, 0, 0], fingers: ['x', '2', '1', '1', 'x', 'x'] }
-    },
-    'F': {
-      'major': { frets: [1, 3, 3, 2, 1, 1], fingers: ['1', '3', '4', '2', '1', '1'] },
-      'minor': { frets: [1, 3, 3, 1, 1, 1], fingers: ['1', '3', '4', '1', '1', '1'] }
-    },
-    'F#': {
-      'major': { frets: [2, 4, 4, 3, 2, 2], fingers: ['1', '3', '4', '2', '1', '1'] },
-      'minor': { frets: [2, 4, 4, 2, 2, 2], fingers: ['1', '3', '4', '1', '1', '1'] }
-    },
-    'G': {
-      'major': { frets: [3, 2, 0, 0, 3, 3], fingers: ['2', '1', 'x', 'x', '3', '4'] },
-      'minor': { frets: [3, 5, 5, 3, 3, 3], fingers: ['1', '3', '4', '1', '1', '1'] },
-      'major7': { frets: [3, 2, 0, 0, 2, 2], fingers: ['2', '1', 'x', 'x', '3', '4'] }
-    },
-    'G#': {
-      'major': { frets: [4, 3, 1, 1, 4, 4], fingers: ['2', '1', '1', '1', '3', '4'] },
-      'minor': { frets: [4, 6, 6, 4, 4, 4], fingers: ['1', '3', '4', '1', '1', '1'] }
-    },
-    'A': {
-      'major': { frets: [0, 0, 2, 2, 2, 0], fingers: ['x', 'x', '1', '2', '3', 'x'] },
-      'minor': { frets: [0, 0, 2, 2, 1, 0], fingers: ['x', 'x', '2', '3', '1', 'x'] },
-      'major7': { frets: [0, 0, 2, 1, 2, 0], fingers: ['x', 'x', '2', '1', '3', 'x'] }
-    },
-    'A#': {
-      'major': { frets: [1, 1, 3, 3, 3, 1], fingers: ['1', '1', '2', '3', '4', '1'] },
-      'minor': { frets: [1, 1, 3, 3, 2, 1], fingers: ['1', '1', '3', '4', '2', '1'] }
-    },
-    'B': {
-      'major': { frets: [2, 2, 4, 4, 4, 2], fingers: ['1', '1', '2', '3', '4', '1'] },
-      'minor': { frets: [2, 2, 4, 4, 3, 2], fingers: ['1', '1', '3', '4', '2', '1'] }
-    }
-  };
-
-  // Initialize audio context
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      setAudioContext(new AudioContext());
-    }
-  }, []);
-
-  // Get notes in the current chord
   const getChordNotes = () => {
     const rootIndex = notes.indexOf(rootNote);
     const formula = chordFormulas[chordType];
-    
+    if (!formula) return [];
     return formula.map(interval => {
       const noteIndex = (rootIndex + interval) % 12;
       return notes[noteIndex];
     });
   };
 
-  // Get guitar chord fingering
-  const getGuitarChordFingering = () => {
-    const chordData = guitarChords[rootNote]?.[chordType];
-    if (chordData) {
-      return chordData;
+  // Play chord audio file from public/sounds folder
+  const playChord = () => {
+    if (isPlaying) return;
+
+    setIsPlaying(true);
+
+    // Stop previous audio if playing
+    if (audioRefs.current) {
+      audioRefs.current.pause();
+      audioRefs.current.currentTime = 0;
     }
-    
-    // Fallback: show basic barre chord pattern
-    const rootIndex = notes.indexOf(rootNote);
-    const baseFret = rootIndex >= 1 && rootIndex <= 4 ? rootIndex : 1;
-    return {
-      frets: [baseFret, baseFret + 3, baseFret + 3, baseFret + 2, baseFret + 1, baseFret],
-      fingers: ['1', '4', '4', '3', '2', '1']
+
+    // Construct audio file path, lowercase and replace # with 'sharp'
+    const rootForFile = rootNote.replace('#', 'sharp').toLowerCase();
+    const chordForFile = chordType.toLowerCase();
+    const soundFilePath = `/sounds/${instrument}/${rootForFile}-${chordForFile}.mp3`;
+
+    const audio = new Audio(soundFilePath);
+    audioRefs.current = audio;
+
+    audio.play().catch(() => {
+      setIsPlaying(false);
+      // optionally handle error in audio playback or file not found
+    });
+
+    // When audio ends
+    audio.onended = () => {
+      setIsPlaying(false);
     };
   };
 
-  // Play chord function with different sounds for each instrument
-  const playChord = async () => {
-    if (!audioContext) return;
-    
-    setIsPlaying(true);
-    
-    // Stop any currently playing sounds
-    audioRefs.current.forEach(source => {
-      if (source) source.stop();
-    });
-    audioRefs.current = [];
-    
-    const chordNotes = getChordNotes();
-    
-    // Play each note in the chord
-    chordNotes.forEach((note, index) => {
-      // Calculate frequency based on note (A4 = 440Hz)
-      const frequencies = {
-        'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
-        'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
-        'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
-      };
-      
-      const baseFrequency = frequencies[note];
-      
-      // Create oscillator with different settings for each instrument
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const filter = audioContext.createBiquadFilter();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(filter);
-      filter.connect(audioContext.destination);
-      
-      if (instrument === 'guitar') {
-        // Guitar-like sound
-        oscillator.type = 'sawtooth';
-        filter.type = 'lowpass';
-        filter.frequency.value = 2000;
-        
-        // Add some detuning for richer guitar sound
-        oscillator.detune.value = (index - 1) * 5;
-        
-        // Guitar envelope - sharper attack, longer decay
-        const now = audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.4, now + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 2.0);
-        
-        oscillator.start(now);
-        oscillator.stop(now + 2.0);
-      } else {
-        // Piano-like sound
-        oscillator.type = 'triangle';
-        filter.type = 'lowpass';
-        filter.frequency.value = 3000;
-        
-        // Piano envelope
-        const now = audioContext.currentTime;
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
-        
-        oscillator.start(now);
-        oscillator.stop(now + 1.5);
-      }
-      
-      oscillator.frequency.value = baseFrequency;
-      
-      // Store reference to stop if needed
-      audioRefs.current.push(oscillator);
-    });
-    
-    // Reset playing state after chord finishes
-    setTimeout(() => setIsPlaying(false), instrument === 'guitar' ? 2000 : 1500);
+  // Get guitar chord image path
+  const getGuitarChordImage = () => {
+    // Format the chord name for the image file
+    // Replace # with 'sharp' and convert to lowercase
+    const formattedRoot = rootNote.replace('#', 'sharp').toLowerCase();
+    const formattedType = chordType.toLowerCase();
+
+    // Construct image path
+    const imagePath = `/guitarchords/${formattedRoot}-${formattedType}.jpg`;
+
+    return imagePath;
   };
 
-  // Render piano keys
+  // Render full-width piano keys with accurate layout
   const renderPianoKeys = () => {
-    const chordNotes = getChordNotes();
-    
-    // Define piano keys (white and black)
-    const pianoKeys = [
-      { note: 'C', type: 'white', left: 0 },
-      { note: 'C#', type: 'black', left: 30 },
-      { note: 'D', type: 'white', left: 40 },
-      { note: 'D#', type: 'black', left: 70 },
-      { note: 'E', type: 'white', left: 80 },
-      { note: 'F', type: 'white', left: 120 },
-      { note: 'F#', type: 'black', left: 150 },
-      { note: 'G', type: 'white', left: 160 },
-      { note: 'G#', type: 'black', left: 190 },
-      { note: 'A', type: 'white', left: 200 },
-      { note: 'A#', type: 'black', left: 230 },
-      { note: 'B', type: 'white', left: 240 }
+    const chordNotes = getChordNotes(); // যেমন ["C", "E", "G"]
+
+    const octaveKeys = [
+      { note: "C", type: "white" },
+      { note: "C#", type: "black" },
+      { note: "D", type: "white" },
+      { note: "D#", type: "black" },
+      { note: "E", type: "white" },
+      { note: "F", type: "white" },
+      { note: "F#", type: "black" },
+      { note: "G", type: "white" },
+      { note: "G#", type: "black" },
+      { note: "A", type: "white" },
+      { note: "A#", type: "black" },
+      { note: "B", type: "white" },
     ];
-    
-    return (
-      <div className="overflow-x-auto py-2">
-        <div className="relative h-36 w-72 bg-gray-200 rounded-lg shadow-lg mx-auto">
-          {pianoKeys.map((key) => (
-            <div 
-              key={key.note}
-              className={`absolute rounded-b cursor-pointer transition-colors duration-100 ${
-                key.type === 'white' 
-                  ? `w-10 h-32 bg-white border border-gray-300 z-10 ${
-                      chordNotes.includes(key.note) ? 'bg-yellow-400' : ''
-                    }`
-                  : `w-6 h-20 bg-gray-800 z-20 ${
-                      chordNotes.includes(key.note) ? 'bg-orange-500' : ''
-                    }`
-              }`}
-              style={{ left: `${key.left}px` }}
-            >
-              <span className={`absolute bottom-1 w-full text-center text-xs font-bold ${
-                key.type === 'black' ? 'text-white' : ''
-              }`}>
-                {key.note}
-              </span>
-            </div>
-          ))}
+
+    // octave generator
+    const generateKeys = (octaves = 1) => {
+      let keys = [];
+      for (let i = 0; i < octaves; i++) {
+        keys.push(
+          ...octaveKeys.map((k) => ({
+            ...k,
+            note: k.note + (4 + i), // যেমন C4, C5
+            index: i * octaveKeys.length + octaveKeys.indexOf(k), // absolute index
+          }))
+        );
+      }
+      return keys;
+    };
+
+    const renderKeys = (pianoKeys) => {
+      const whiteKeys = pianoKeys.filter((k) => k.type === "white");
+
+      return (
+        <div className="flex relative w-full h-40">
+          {/* White keys */}
+          {whiteKeys.map((key, i) => {
+            const baseNote = key.note.replace(/[0-9]/g, "");
+            const isActive = chordNotes.includes(baseNote);
+
+            return (
+              <div
+                key={key.note}
+                className="relative border border-gray-400"
+                style={{
+                  flex: "1 1 0", // equally distributed
+                  backgroundColor: isActive ? "#facc15" : "white",
+                  borderBottomLeftRadius: "6px",
+                  borderBottomRightRadius: "6px",
+                  transition: "0.2s ease",
+                }}
+              >
+                <span className="absolute bottom-1 w-full text-center text-xs sm:text-sm font-bold text-black select-none">
+                  {key.note}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* Black keys */}
+          {pianoKeys
+            .filter((k) => k.type === "black")
+            .map((key) => {
+              const baseNote = key.note.replace(/[0-9]/g, "");
+              const isActive = chordNotes.includes(baseNote);
+
+              // কোন white key এর পরে বসবে সেটা বের করা
+              const whiteIndexBefore = whiteKeys.findIndex(
+                (w, idx) =>
+                  w.index > key.index && idx > 0
+              ) - 1;
+
+              const percentPerWhite = 100 / whiteKeys.length;
+
+              return (
+                <div
+                  key={key.note}
+                  className="absolute"
+                  style={{
+                    left: `${(whiteIndexBefore + 1) * percentPerWhite - percentPerWhite / 3}%`,
+                    width: `${percentPerWhite / 1.5}%`,
+                    height: "60%",
+                    backgroundColor: isActive ? "#ea580c" : "black",
+                    borderRadius: "0 0 6px 6px",
+                    zIndex: 10,
+                    transition: "0.2s ease",
+                  }}
+                  title={key.note}
+                >
+                  <span className="absolute bottom-1 w-full text-center text-[10px] font-bold text-white select-none">
+                    {key.note}
+                  </span>
+                </div>
+              );
+            })}
         </div>
+      );
+    };
+
+    return (
+      <div className="w-full">
+        {/* Mobile → ১ octave */}
+        <div className="flex md:hidden">{renderKeys(generateKeys(1))}</div>
+
+        {/* Desktop → ২ octave */}
+        <div className="hidden md:flex">{renderKeys(generateKeys(2))}</div>
       </div>
     );
   };
 
-  // Render guitar fretboard with accurate chord fingerings
-  const renderGuitarFretboard = () => {
-    const chordFingering = getGuitarChordFingering();
-    const strings = ['E', 'A', 'D', 'G', 'B', 'E']; // Standard tuning
-    
+  // Render guitar chord image
+  const renderGuitarChord = () => {
+    const chordImagePath = getGuitarChordImage();
+
     return (
-      <div className="flex flex-col items-center">
-        <div className="w-80 bg-amber-800 rounded-lg p-4 shadow-lg">
-          {/* Nut */}
-          <div className="flex h-8 mb-2 relative border-b-4 border-amber-900">
-            {strings.map((string, stringIndex) => (
-              <div key={stringIndex} className="flex-1 relative">
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-gray-700 rounded-full z-10 flex items-center justify-center text-white text-xs">
-                  {chordFingering.fingers[stringIndex]}
-                </div>
-                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-600 transform -translate-y-1/2"></div>
-              </div>
-            ))}
+      <div className="w-full flex flex-col items-center justify-center p-6 bg-white rounded-lg">
+        <div className="text-center mb-4">
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">
+            {rootNote} {chordType.charAt(0).toUpperCase() + chordType.slice(1)} Chord
+          </h3>
+          <p className="text-gray-600">Guitar Fingering Diagram</p>
+        </div>
+
+        <div className="bg-gray-100 p-6 rounded-xl shadow-inner max-w-sm w-full">
+          <img
+            src={chordImagePath}
+            alt={`${rootNote} ${chordType} guitar chord`}
+            className="w-full h-auto max-w-xs mx-auto rounded-lg shadow-md"
+            onError={(e) => {
+              // Fallback if image doesn't exist
+              e.target.style.display = 'none';
+              const fallbackDiv = document.getElementById('chord-fallback');
+              if (fallbackDiv) fallbackDiv.style.display = 'block';
+            }}
+          />
+
+          {/* Fallback message if image not found */}
+          <div
+            id="chord-fallback"
+            className="hidden text-center p-8 bg-yellow-50 rounded-lg border border-yellow-200"
+          >
+            <p className="text-yellow-700 font-semibold mb-2">Chord diagram not available</p>
+            <p className="text-yellow-600 text-sm">
+              The {rootNote} {chordType} chord image is not available in the library.
+            </p>
           </div>
-          
-          {/* Frets */}
-          {[1, 2, 3, 4].map((fret) => (
-            <div key={fret} className="flex h-8 mb-1 relative">
-              {/* Fret wire */}
-              <div className="absolute top-0 left-0 right-0 h-1  "></div>
-              
-              {strings.map((string, stringIndex) => {
-                const fretPosition = chordFingering.frets[stringIndex];
-                const isOpenString = fretPosition === 0;
-                const isFingered = fretPosition === fret;
-                const isMuted = fretPosition === 'x';
-                
-                return (
-                  <div 
-                    key={stringIndex}
-                    className="flex-1 relative border-r-2  last:border-r-0"
-                  >
-                    {/* String */}
-                    <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-400 transform -translate-y-1/2"></div>
-                    
-                    {isFingered && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-blue-600 rounded-full z-10 flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                        {chordFingering.fingers[stringIndex]}
-                      </div>
-                    )}
-                    
-                    {isOpenString && fret === 1 && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-green-600 font-bold z-10">
-                        ○
-                      </div>
-                    )}
-                    
-                    {isMuted && fret === 1 && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xs text-red-600 font-bold z-10">
-                        ×
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
         </div>
-        
-        {/* Fret numbers */}
-        <div className="flex w-80 justify-between mt-2 px-4">
-          <span className="font-bold text-gray-700 text-sm">Open</span>
-          <span className="font-bold text-gray-700 text-sm">1</span>
-          <span className="font-bold text-gray-700 text-sm">2</span>
-          <span className="font-bold text-gray-700 text-sm">3</span>
-          <span className="font-bold text-gray-700 text-sm">4</span>
-        </div>
-        
-        {/* String names */}
-        <div className="flex w-80 justify-between mt-2 px-4">
-          {strings.map((string, index) => (
-            <span key={index} className="font-bold text-gray-700 text-sm">
-              {string}
-            </span>
-          ))}
-        </div>
-        
-        {/* Chord diagram info */}
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-600">
-            {chordFingering.frets.map((fret, idx) => 
-              fret === 'x' ? 'X' : fret
-            ).join(' ')}
-          </p>
+
+        <div className="mt-4 text-center text-sm text-gray-500">
+          <p>Chord: <span className="font-mono font-bold">{rootNote} {chordType}</span></p>
+          <p className="mt-1">Notes: <span className="font-semibold">{getChordNotes().join(' - ')}</span></p>
         </div>
       </div>
     );
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Chord Finder</h1>
-        <p className="text-gray-600">Visualize and play piano and guitar chords</p>
-      </div>
-      
-      <div className="flex flex-wrap gap-4 mb-8 justify-center">
-        <div className="flex flex-col min-w-[150px]">
-          <label htmlFor="root-note" className="mb-1 font-semibold text-gray-700">
-            Root Note:
-          </label>
-          <select 
-            id="root-note"
-            value={rootNote} 
-            onChange={(e) => setRootNote(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md bg-white"
-          >
-            {notes.map(note => (
-              <option key={note} value={note}>{note}</option>
-            ))}
-          </select>
+    <div>
+      <div className=" mx-auto p-4 bg-white rounded-xl shadow-lg flex flex-col items-center">
+        <div className="w-full max-w-screen-lg text-center mb-10">
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Chord Finder</h1>
+          <p className="text-lg text-gray-700">Visualize and play piano and guitar chords</p>
         </div>
-        
-        <div className="flex flex-col min-w-[150px]">
-          <label htmlFor="chord-type" className="mb-1 font-semibold text-gray-700">
-            Chord Type:
-          </label>
-          <select 
-            id="chord-type"
-            value={chordType} 
-            onChange={(e) => setChordType(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md bg-white"
-          >
-            {chordTypes.map(type => (
-              <option key={type.value} value={type.value}>{type.name}</option>
-            ))}
-          </select>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 place-items-center gap-3 max-w-screen-lg w-full mb-8">
+          <div className="flex flex-col min-w-[160px]">
+            <label htmlFor="root-note" className="mb-1 font-semibold text-gray-700">Root Note:</label>
+            <select
+              id="root-note"
+              value={rootNote}
+              onChange={e => setRootNote(e.target.value)}
+              className="p-3 border border-gray-300 rounded-md bg-white cursor-pointer"
+            >
+              {notes.map(note => (
+                <option key={note} value={note}>{note}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col min-w-[160px]">
+            <label htmlFor="chord-type" className="mb-1 font-semibold text-gray-700">Chord Type:</label>
+            <select
+              id="chord-type"
+              value={chordType}
+              onChange={e => setChordType(e.target.value)}
+              className="p-3 border border-gray-300 rounded-md bg-white cursor-pointer"
+            >
+              {chordTypes.map(type => (
+                <option key={type.value} value={type.value}>{type.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col min-w-[160px]">
+            <label htmlFor="instrument" className="mb-1 font-semibold text-gray-700">Instrument:</label>
+            <select
+              id="instrument"
+              value={instrument}
+              onChange={e => setInstrument(e.target.value)}
+              className="p-3 border border-gray-300 rounded-md bg-white cursor-pointer"
+            >
+              <option value="piano">Piano</option>
+              <option value="guitar">Guitar</option>
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <button
+              className={`px-8 py-3 w-40 rounded-md font-semibold transition-colors ${isPlaying ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              onClick={playChord}
+              disabled={isPlaying}
+            >
+              {isPlaying ? 'Playing... ' : 'Play Chord'}
+            </button>
+          </div>
         </div>
-        
-        <div className="flex flex-col min-w-[150px]">
-          <label htmlFor="instrument" className="mb-1 font-semibold text-gray-700">
-            Instrument:
-          </label>
-          <select 
-            id="instrument"
-            value={instrument} 
-            onChange={(e) => setInstrument(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md bg-white"
-          >
-            <option value="piano">Piano</option>
-            <option value="guitar">Guitar</option>
-          </select>
-        </div>
-        
-        <button 
-          className="px-6 py-2 bg-blue-600 text-white rounded-md font-medium self-end transition-colors hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          onClick={playChord}
-          disabled={isPlaying}
-        >
-          {isPlaying ? 'Playing...' : 'Play Chord'}
-        </button>
-      </div>
-      
-      <div className="bg-white rounded-lg p-6 shadow-md">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            {rootNote} {chordTypes.find(t => t.value === chordType)?.name}
-          </h2>
-          <p className="text-lg text-gray-600">
-            Notes: {getChordNotes().join(' - ')}
-          </p>
-        </div>
-        
-        <div className="flex justify-center">
-          {instrument === 'piano' ? renderPianoKeys() : renderGuitarFretboard()}
+
+        <div className="w-full max-w-screen-lg bg-white rounded-2xl shadow-lg p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 mb-1">{rootNote} {chordTypes.find(t => t.value === chordType)?.name}</h2>
+            <p className="text-xl text-gray-600 select-none">
+              Notes: {getChordNotes().join(' - ')}
+            </p>
+          </div>
+
+          <div className="w-full border-2 rounded-lg overflow-hidden">
+            {instrument === 'piano' ? renderPianoKeys() : renderGuitarChord()}
+          </div>
         </div>
       </div>
+      <div className="mt-12 bg-gray-50 rounded-lg p-6 shadow-md">
+  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+    What is the chord finder tool?
+  </h3>
+
+  <div className="space-y-4 text-gray-700">
+    <p>
+      The chord finder tool helps musicians visualize and play chords on different instruments such as piano and guitar.
+      It displays the notes that make up the chord and shows how to finger the chord on a guitar or which keys to press on a piano.
+    </p>
+
+    <p>
+      Users can select the root note and chord type (such as major or minor) along with the instrument.
+      The tool then highlights the notes of that chord on an accurate instrument diagram.
+    </p>
+
+    <p className="font-semibold text-gray-800">
+      The chord finder tool can assist you in:
+    </p>
+
+    <ul className="list-disc list-inside space-y-2 ml-4">
+      <li>
+        <strong>Learning new chords.</strong> Discover how chords are formed and where to play them on a guitar or piano.
+      </li>
+      <li>
+        <strong>Visualizing chords.</strong> See the individual notes and finger positions that create each chord.
+      </li>
+      <li>
+        <strong>Playing chords.</strong> Listen to the chord sounds for piano or guitar directly from the tool to better understand their tone.
+      </li>
+      <li>
+        <strong>Enhancing composition.</strong> Quickly experiment with different chords and hear how they sound to inspire songwriting.
+      </li>
+    </ul>
+
+    <p>
+      The tool provides an interactive and educational way to explore music theory concepts with practical applications on real instruments.
+    </p>
+
+    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+      <h4 className="font-bold text-blue-800 mb-2">Using the chord finder</h4>
+      <p className="text-blue-700">
+        Select the root note and chord type to display the chord diagram for piano or guitar.
+        The chord notes will be highlighted on the instrument visual.
+      </p>
+      <p className="text-blue-700 mt-2">
+        Click the "Play Chord" button to hear how the chord sounds. Change the instrument option to switch between piano and guitar sounds.
+      </p>
+      <p className="text-blue-700 mt-2">
+        Use the chord diagrams to practice finger placement and improve your playing skills.
+      </p>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 };

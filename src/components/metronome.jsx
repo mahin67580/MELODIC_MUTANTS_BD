@@ -376,31 +376,30 @@ const Metronome = () => {
 
              <div className=" ">
                 {/* About Metronome Section */}
-                <div className="mt-8 border-t pt-4 text-gray-800 leading-relaxed">
+                <div className="mt-8 border-t flex items-center justify-center flex-col pt-4 text-gray-800 leading-relaxed">
                     <h3 className="text-xl font-semibold mb-2">About the Metronome</h3>
-                    <p className="mb-3">
+                    <p className="mb-3 text-justify">
                         <strong>What is a metronome?</strong><br />
                         A metronome is a device that produces a steady pulse to help musicians play in time. The pulse is measured in
                         BPM (beats-per-minute). A tempo marking of 60 BPM equals one beat per second, while 120 BPM equals two beats
                         per second.
-                    </p>
-                    <p className="mb-3">
                         A metronome is commonly used as a practice tool to help maintain a steady tempo while learning difficult
                         passages. It is also used in live performances and recording studios to ensure an accurate tempo throughout
                         the performance or session.
                     </p>
-                    <p className="mb-3">
+                    
+                    <p className="mb-3 text-justify">
                         <strong>Using the metronome</strong><br />
                         Start by selecting a tempo using the slider or, the left and right arrow keys on your keyboard. Alternately,
                         you can tap the tempo by clicking the "Tap tempo" button at the desired tempo or by using the "t" key on your
                         keyboard.
                     </p>
-                    <p className="mb-3">
+                    <p className="mb-3 text-justify">
                         Select the number of beats per measure at the bottom. Most music has 4, 3 or 2 beats per measure, in music
                         notation denoted by time signatures such as 4/4, 3/4, 2/4 and 2/2. You can always select 1 if you don't know
                         the number of beats per measure.
                     </p>
-                    <div className="mb-3">
+                    <div className="mb-3 text-justify">
                         You can use the metronome to:
                         <ul className="list-disc ml-6 mt-2 space-y-1">
                             <li>

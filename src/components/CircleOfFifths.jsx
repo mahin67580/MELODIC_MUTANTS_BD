@@ -135,7 +135,7 @@ const CircleOfFifths = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-white rounded-xl shadow-lg">
+    <div className="  mx-auto p-4 bg-white rounded-xl shadow-lg">
       {/* Controls */}
       <div className="flex flex-wrap gap-4 mb-6 justify-center">
         <button

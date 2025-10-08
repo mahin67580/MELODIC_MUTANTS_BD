@@ -1,17 +1,12 @@
-import ChordFinder from '@/components/ChordFinder/ChordFinder'
-import CircleOfFifths from '@/components/CircleOfFifths'
-import Metronome from '@/components/metronome'
-import ScaleFinder from '@/components/ScaleFinder'
-import React from 'react'
+import React from 'react';
 
-export default function tools() {
-    return (
-        <div className='min-h-screen'>tools
-
-            <Metronome />
-            {/* <ChordFinder /> */}
-            {/* <CircleOfFifths /> */}
-            {/* <ScaleFinder /> */}
-        </div>
-    )
+export default function ToolsPage() {
+  return (
+    <div className="min-h-screen">
+      {/* This will be replaced by the layout content */}
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Select a tool from the sidebar to get started
+      </div>
+    </div>
+  );
 }
