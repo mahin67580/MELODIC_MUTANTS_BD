@@ -6,8 +6,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, CheckCircle } from "lucide-react";
-import CertificateDownload from "@/components/CertificateDownload";
- 
+const CertificateDownload = dynamic(() => import("@/components/CertificateDownload"), { ssr: false });
+import dynamic from "next/dynamic";
+
 
 // Helper: convert Google Drive link to embeddable preview link
 function getEmbedUrl(url) {
@@ -34,7 +35,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
   // Initialize progress from props
   useEffect(() => {
     if (initialProgress) {
-      console.log('Initial progress received:', initialProgress);
+      // console.log('Initial progress received:', initialProgress);
       setWatchedVideos(new Set(initialProgress.watchedVideos || []));
       setProgress(initialProgress.progress || 0);
 
@@ -48,14 +49,14 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
   // Calculate progress percentage - ensure it's exactly 100 when all videos are watched
   const calculateProgress = useMemo(() => {
     if (modules.length === 0) return 0;
-    
+
     const progressValue = Math.round((watchedVideos.size / modules.length) * 100);
-    
+
     // Ensure it's exactly 100 when all modules are watched
     if (watchedVideos.size === modules.length) {
       return 100;
     }
-    
+
     return progressValue;
   }, [watchedVideos, modules.length]);
 
@@ -98,7 +99,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
         const response = await fetch(`/api/progress?userId=${encodeURIComponent(userId)}&courseId=${encodeURIComponent(courseId)}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('Progress loaded from API:', data);
+          // console.log('Progress loaded from API:', data);
           if (data.progress !== undefined && data.watchedVideos) {
             setWatchedVideos(new Set(data.watchedVideos));
             setProgress(data.progress);
@@ -135,7 +136,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
 
     setIsSaving(true);
     setSaveError('');
-    
+
     try {
       const progressData = {
         userId: userId.toString(),
@@ -145,7 +146,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
         lastWatchedModule: currentIndex
       };
 
-      console.log('Saving progress to server:', progressData);
+      // console.log('Saving progress to server:', progressData);
 
       const response = await fetch('/api/progress', {
         method: 'POST',
@@ -156,12 +157,12 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.error || `HTTP error! status: ${response.status}`);
       }
 
-      console.log('Progress saved successfully:', result);
+      // console.log('Progress saved successfully:', result);
     } catch (error) {
       console.error("Failed to save progress:", error);
       setSaveError(error.message);
@@ -196,12 +197,12 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
     setWatchedVideos(prev => {
       const newSet = new Set(prev);
       newSet.add(moduleIndex);
-      
+
       // Log when course is completed
-      if (newSet.size === modules.length) {
-        console.log('🎉 Course completed! All modules watched');
-      }
-      
+      // if (newSet.size === modules.length) {
+      //   console.log('🎉 Course completed! All modules watched');
+      // }
+
       return newSet;
     });
   };
@@ -219,7 +220,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentIndex !== null && currentIndex !== undefined && !watchedVideos.has(currentIndex)) {
-        console.log('Auto-marking video as watched:', currentIndex);
+        // console.log('Auto-marking video as watched:', currentIndex);
         markAsWatched(currentIndex);
       }
     }, 30000); // 30 seconds
@@ -229,16 +230,16 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
 
   // Handle manual mark as watched for current video
   const handleMarkAsWatched = () => {
-    console.log('Manually marking video as watched:', currentIndex);
+    // console.log('Manually marking video as watched:', currentIndex);
     markAsWatched(currentIndex);
   };
 
   // Debug: Log when progress reaches 100%
   useEffect(() => {
     if (calculateProgress === 100) {
-      console.log('✅ Client-side progress reached 100%');
-      console.log('Watched videos:', Array.from(watchedVideos));
-      console.log('Total modules:', modules.length);
+      // console.log('✅ Client-side progress reached 100%');
+      // console.log('Watched videos:', Array.from(watchedVideos));
+      // console.log('Total modules:', modules.length);
     }
   }, [calculateProgress, watchedVideos, modules.length]);
 
@@ -247,8 +248,8 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
     <div className="space-y-6">
       {/* Certificate Download - Shows when course is completed */}
       <CertificateDownload
-        courseId={courseId} 
-        progress={calculateProgress} 
+        courseId={courseId}
+        progress={calculateProgress}
         courseData={courseData}
         userId={userId}
       />
@@ -268,7 +269,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
           <CardTitle className="text-lg flex justify-between items-center">
             <span>Course Progress</span>
             <span className="text-sm font-normal text-gray-600">
-              {calculateProgress}% Complete  
+              {calculateProgress}% Complete
             </span>
           </CardTitle>
         </CardHeader>
@@ -428,17 +429,17 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
                           <div
                             key={i}
                             className={`flex items-center justify-between p-3 rounded-lg transition-colors ${isCurrent
-                                ? "bg-blue-100 border border-blue-200"
-                                : isWatched
-                                  ? "bg-green-50 border border-green-200"
-                                  : "hover:bg-gray-50"
+                              ? "bg-blue-100 border border-blue-200"
+                              : isWatched
+                                ? "bg-green-50 border border-green-200"
+                                : "hover:bg-gray-50"
                               }`}
                           >
                             <div className="flex items-center space-x-3">
                               <div className={`w-2 h-2 rounded-full ${isCurrent ? "bg-blue-600" : isWatched ? "bg-green-500" : "bg-gray-300"
                                 }`}></div>
                               <span className={`text-sm ${isCurrent ? "text-blue-900 font-medium" :
-                                  isWatched ? "text-green-900" : "text-gray-700"
+                                isWatched ? "text-green-900" : "text-gray-700"
                                 }`}>
                                 {mod.title}
                               </span>

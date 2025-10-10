@@ -87,7 +87,7 @@ export default function InstructorsPage({ instructors }) {
       // This prevents the loading state from sticking if navigation is slow
       setTimeout(() => {
         setLoadingId(null);
-      }, 500);
+      }, 600);
     } catch (error) {
       console.error("Navigation error:", error);
       setLoadingId(null);

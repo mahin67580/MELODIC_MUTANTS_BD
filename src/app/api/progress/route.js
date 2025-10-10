@@ -82,13 +82,13 @@ export async function POST(request) {
       : [];
     const validatedLastWatchedModule = Number(lastWatchedModule) || 0;
 
-    console.log('Saving progress:', {
-      userId,
-      courseId,
-      progress: validatedProgress,
-      watchedVideos: validatedWatchedVideos,
-      lastWatchedModule: validatedLastWatchedModule
-    });
+    // console.log('Saving progress:', {
+    //   userId,
+    //   courseId,
+    //   progress: validatedProgress,
+    //   watchedVideos: validatedWatchedVideos,
+    //   lastWatchedModule: validatedLastWatchedModule
+    // });
 
     const result = await progressCollection.updateOne(
       { userId, courseId },
