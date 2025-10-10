@@ -15,6 +15,11 @@ export const dynamic = "force-dynamic";
 export default async function InstructorDetailPage({ params }) {
     const { id } = await params;
 
+    // Add validation
+    if (!id || !ObjectId.isValid(id)) {
+        return <div>Invalid instructor ID</div>;
+    }
+
     const instructorCollection = await dbConnect(
         collectionNamesObj.instructorCollection
     );

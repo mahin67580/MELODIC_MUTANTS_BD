@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { FaGuitar, FaAward, FaUserTie } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { FaGuitar } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
-import { useRouter } from "next/navigation"; // <-- added
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,12 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function InstructorsPage({ instructors }) {
-  const router = useRouter(); // <-- added
   const [search, setSearch] = useState("");
   const [instrument, setInstrument] = useState("all");
-  const [minExp, setMinExp] = useState("");
-  const [maxExp, setMaxExp] = useState("");
-  const [loadingId, setLoadingId] = useState(null); // <-- track which profile button is loading
+  const [loadingId, setLoadingId] = useState(null);
+
+  const router = useRouter();
 
   const instrumentOptions = [
     "Acoustic Guitar",
@@ -56,15 +55,12 @@ export default function InstructorsPage({ instructors }) {
   const clearFilters = () => {
     setSearch("");
     setInstrument("all");
-    setMinExp("");
-    setMaxExp("");
   };
 
   const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  // small inline spinner (SVG) — you can replace with your UI lib spinner if available
   const Spinner = ({ className }) => (
     <svg
       className={className}
@@ -80,6 +76,23 @@ export default function InstructorsPage({ instructors }) {
       </path>
     </svg>
   );
+
+  const handleViewProfile = async (id) => {
+    setLoadingId(id);
+    try {
+      // router.push returns void, not a Promise in some environments
+      router.push(`/instructors/${id}`);
+
+      // Remove the loading state after a short delay
+      // This prevents the loading state from sticking if navigation is slow
+      setTimeout(() => {
+        setLoadingId(null);
+      }, 500);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setLoadingId(null);
+    }
+  };
 
   return (
     <div className="px-4 py-10">
@@ -138,11 +151,7 @@ export default function InstructorsPage({ instructors }) {
         </Badge>
 
         {filtered.length !== instructors.length && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-          >
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
             Show all instructors
           </Button>
         )}
@@ -163,15 +172,9 @@ export default function InstructorsPage({ instructors }) {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((inst) => (
-            // NOTE: removed <Link> wrapper. We will handle navigation manually to control spinner.
             <Card
               key={inst._id}
-              className="group cursor-pointer h-full hover:shadow-lg transition-all duration-300"
-              onClick={() => {
-                // navigate if user clicks anywhere on the card (no spinner)
-                router.push(`/instructors/${inst._id}`);
-              }}
-              role="button"
+              className="group h-full hover:shadow-lg transition-all duration-300"
             >
               <CardHeader className="text-center">
                 <div className="flex items-center gap-7">
@@ -210,19 +213,10 @@ export default function InstructorsPage({ instructors }) {
                 </div>
 
                 <div className="pt-4 border-t">
-                  {/* Important: stop propagation to prevent card's onClick also running */}
                   <Button
-                    variant="ghost"
-                    size="sm"
                     className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevent the card's onClick
-                      if (loadingId) return; // prevent multiple clicks when another is loading
-                      setLoadingId(inst._id);
-                      // navigate
-                      router.push(`/instructors/${inst._id}`);
-                    }}
-                    disabled={!!loadingId} // disable when any profile is loading
+                    onClick={() => handleViewProfile(inst._id)}
+                    disabled={loadingId === inst._id}
                   >
                     {loadingId === inst._id ? (
                       <div className="flex items-center justify-center gap-2">

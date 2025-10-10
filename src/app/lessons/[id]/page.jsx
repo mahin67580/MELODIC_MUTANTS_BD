@@ -7,7 +7,7 @@ export default async function LessonDetailsPage({ params }) {
     const { id } = await params
 
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/lesson/${id}`, {
+        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/lesson/${id}`, {
             cache: 'no-store'
         })
 

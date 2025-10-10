@@ -8,7 +8,7 @@ export const middleware = async (req) => {
     const token = await getToken({
         req,
         // secret: process.env.NEXTAUTH_SECRET,
-        secureCookie: process.env.NODE_ENV === "production" ? true : false,
+        // secureCookie: process.env.NODE_ENV === "production" ? true : false,
     })
 
     if (token) {
