@@ -176,12 +176,12 @@ export default function CertificateDownload({ courseId, progress, courseData, us
 
     return (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 mb-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-5 lg:flex-row items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <div className="bg-green-100 p-3 rounded-full">
                         <CheckCircle className="h-8 w-8 text-green-600" />
                     </div>
-                    <div className="flex-1">
+                    <div className=" ">
                         <h3 className="text-lg font-semibold text-green-900">Course Completed! 🎉</h3>
                         <p className="text-green-700 text-sm">
                             Congratulations! You've successfully completed this course. Download your certificate below.

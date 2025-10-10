@@ -101,7 +101,7 @@ const Hero = ({ className = '' }) => {
             }`}>
             <Badge 
               variant="secondary" 
-              className="mt-2 px-4 py-2 bg-white/20 text-white border-white/30 backdrop-blur-sm"
+              className=" px-4 py-2 bg-white/20 text-white border-white/30 backdrop-blur-sm"
             >
               🎵 Start Your Musical Journey Today
             </Badge>

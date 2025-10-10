@@ -7,9 +7,11 @@ export default async function LessonDetailsPage({ params }) {
     const { id } = await params
 
     try {
-        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/lesson/${id}`, {
-            cache: 'no-store'
-        })
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+
+        const res = await fetch(`${baseUrl}/api/lesson/${id}`, {
+            cache: "no-store",
+        });
 
         if (!res.ok) {
             throw new Error(`Failed to fetch lesson: ${res.status}`)
@@ -169,7 +171,7 @@ export default async function LessonDetailsPage({ params }) {
                                 </div>
                             </div>
 
-                      
+
                             {/* Rating Section */}
                             <div className="flex flex-col items-center justify-center  ">
                                 {lesson.ratings?.length > 0 ? (
@@ -218,7 +220,7 @@ export default async function LessonDetailsPage({ params }) {
 
 
                             {/* Checkout Button */}
-                          <EnrollButton lessonId={lesson._id || id} />
+                            <EnrollButton lessonId={lesson._id || id} />
 
                             {/* Lesson Details */}
                             <div className="space-y-3 pt-4 border-t border-gray-200">

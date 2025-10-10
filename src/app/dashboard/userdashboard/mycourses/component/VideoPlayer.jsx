@@ -328,7 +328,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
       </Card>
 
       {/* Navigation Controls */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center ">
         <Button
           onClick={playPrev}
           disabled={currentIndex === 0}
@@ -340,7 +340,7 @@ export default function VideoPlayer({ pasCourses, modules, userId, courseId, ini
           Previous
         </Button>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row items-center gap-4 p-1">
           <div className="text-sm text-gray-600">
             Module {currentIndex + 1} of {modules.length}
           </div>
