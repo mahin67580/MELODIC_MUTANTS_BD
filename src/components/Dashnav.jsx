@@ -36,8 +36,8 @@ export default function Dashnav() {
       icon: BookOpen
     },
     {
-      href: '/dashboard/userdashboard/wishlist',
-      label: 'Wish List',
+      href: '/dashboard/userdashboard/profile',
+      label: 'Profile',
       icon: Heart
     }
   ]

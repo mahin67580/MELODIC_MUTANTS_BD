@@ -180,7 +180,7 @@ export default function Navbar() {
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                    <Link href="/profile" >Profile</Link>
+                                    <Link href="/dashboard/userdashboard/profile" >Profile</Link>
                                 </DropdownMenuItem>
 
                                 {/* Role-based Dashboard */}
