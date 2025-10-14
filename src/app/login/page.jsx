@@ -176,8 +176,8 @@ export default function Login() {
                 Swal.showLoading()
             }
         })
-
-        try {
+ 
+        try {               
             const result = await signIn(provider, {
                 callbackUrl: '/',
                 redirect: false

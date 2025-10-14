@@ -13,10 +13,144 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, CreditCard, Mail, Phone, User, BookOpen, DollarSign, CheckCircle2 } from "lucide-react"
 
-export default function CheckoutPage({ params }) {
+// Stripe Elements imports
+import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+
+// Function to update database after successful payment
+const updateDatabaseAfterPayment = async (formData, lesson) => {
+  try {
+    // Save enrollment details (equivalent to POST /api/lesson)
+    const postRes = await fetch(`/api/lesson`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+
+    if (!postRes.ok) {
+      throw new Error("Failed to save enrollment details")
+    }
+
+    // Update course enrollment count (equivalent to PATCH /api/courses/:id)
+    const patchRes = await fetch(`/api/courses/${formData.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ enroll: true }),
+    })
+
+    if (!patchRes.ok) {
+      throw new Error("Failed to update course enrollment count")
+    }
+
+    return true
+  } catch (error) {
+    console.error('Database update error:', error)
+    throw error
+  }
+}
+
+// Stripe Payment Form Component
+function StripePaymentForm({ amount, lesson, formData, onSuccess, onError }) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (!stripe || !elements) {
+      return
+    }
+
+    setIsProcessing(true)
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/payment-success`,
+        },
+        redirect: 'if_required',
+      })
+
+      if (error) {
+        await Swal.fire({
+          title: "Payment Failed",
+          text: error.message,
+          icon: "error",
+          confirmButtonColor: "#EF4444",
+        })
+        onError(error)
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Update database with enrollment details (same as credit card method)
+        const dbUpdateSuccess = await updateDatabaseAfterPayment({
+          ...formData,
+          paymentIntentId: paymentIntent.id,
+          paymentMethod: 'stripe'
+        }, lesson)
+
+        if (dbUpdateSuccess) {
+          await Swal.fire({
+            title: "Success!",
+            text: "Your payment has been processed successfully and you're now enrolled!",
+            icon: "success",
+            confirmButtonColor: "#3B82F6",
+            confirmButtonText: "Continue Learning"
+          })
+          onSuccess(paymentIntent)
+        } else {
+          throw new Error('Failed to save enrollment details')
+        }
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      await Swal.fire({
+        title: "Error!",
+        text: "There was a problem processing your payment. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#EF4444",
+      })
+      onError(error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      <Button
+        type="submit"
+        disabled={!stripe || isProcessing}
+        className="w-full h-12 text-lg"
+        size="lg"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            Processing Payment...
+          </>
+        ) : (
+          `Pay $${amount}`
+        )}
+      </Button>
+    </form>
+  )
+}
+
+// Main Checkout Component
+function CheckoutContent({ params }) {
   const { data: session, status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [alreadyBooked, setAlreadyBooked] = useState(false)
+  const [clientSecret, setClientSecret] = useState('')
+  const [showStripeForm, setShowStripeForm] = useState(false)
   const router = useRouter()
 
   const [formData, setFormData] = useState({
@@ -71,6 +205,45 @@ export default function CheckoutPage({ params }) {
     checkBooking()
   }, [status, lesson])
 
+  // Initialize Stripe Payment Intent when Stripe is selected
+  useEffect(() => {
+    if (formData.paymentMethod === 'stripe' && lesson && session) {
+      initializeStripePayment()
+    } else {
+      setShowStripeForm(false)
+      setClientSecret('')
+    }
+  }, [formData.paymentMethod, lesson, session])
+
+  const initializeStripePayment = async () => {
+    try {
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: parseFloat(lesson.price),
+          lessonId: lesson._id,
+          userId: session.user.id,
+          userEmail: session.user.email,
+        }),
+      })
+
+      const { clientSecret } = await response.json()
+      setClientSecret(clientSecret)
+      setShowStripeForm(true)
+    } catch (error) {
+      console.error('Error initializing Stripe payment:', error)
+      await Swal.fire({
+        title: "Error!",
+        text: "Failed to initialize payment. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#EF4444",
+      })
+    }
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -79,38 +252,28 @@ export default function CheckoutPage({ params }) {
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handlePaymentMethodChange = (value) => {
+    setFormData({ ...formData, paymentMethod: value })
+    setShowStripeForm(false)
+    setClientSecret('')
+  }
+
+  const handleStripeSuccess = async (paymentIntent) => {
+    router.push("/dashboard/userdashboard/mycourses")
+  }
+
+  const handleStripeError = (error) => {
+    console.error('Stripe payment error:', error)
+  }
+
+  const handleOtherPaymentSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // 1️⃣ First, save enrollment details (POST)
-      const postRes = await fetch(`/api/lesson`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      // Update database for non-Stripe payment methods
+      await updateDatabaseAfterPayment(formData, lesson)
 
-      if (!postRes.ok) {
-        throw new Error("Failed to save enrollment details")
-      }
-
-      // 2️⃣ Then, increment enrolledStudents (PATCH)
-      const patchRes = await fetch(`/api/courses/${formData.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ enroll: true }),
-      })
-
-      if (!patchRes.ok) {
-        throw new Error("Failed to update course enrollment count")
-      }
-
-      // ✅ Success Alert
       await Swal.fire({
         title: "Success!",
         text: "Your booking has been confirmed successfully!",
@@ -119,15 +282,7 @@ export default function CheckoutPage({ params }) {
         confirmButtonText: "Continue Learning"
       })
 
-      // 👇 Redirect to My Courses
       router.push("/dashboard/userdashboard/mycourses")
-
-      // Reset form if needed
-      setFormData(prev => ({
-        ...prev,
-        phone: "",
-        paymentMethod: "credit-card"
-      }))
     } catch (error) {
       console.error(error)
       await Swal.fire({
@@ -230,7 +385,8 @@ export default function CheckoutPage({ params }) {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* User Information Section - No Form Wrapper */}
+                <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center gap-2">
@@ -313,7 +469,7 @@ export default function CheckoutPage({ params }) {
                     <Label>Payment Method</Label>
                     <RadioGroup 
                       value={formData.paymentMethod} 
-                      onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
+                      onValueChange={handlePaymentMethodChange}
                       className="grid grid-cols-1 md:grid-cols-3 gap-4"
                     >
                       <div>
@@ -355,33 +511,53 @@ export default function CheckoutPage({ params }) {
                     </RadioGroup>
                   </div>
 
-                  <Button
-                    type="submit"
-                    disabled={isLoading || alreadyBooked}
-                    className="w-full h-12 text-lg"
-                    size="lg"
-                  >
-                    {alreadyBooked ? (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 mr-2" />
-                        Already Enrolled
-                      </>
-                    ) : isLoading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      `Confirm Payment - $${lesson.price}`
-                    )}
-                  </Button>
+                  {/* Payment Section - Separate Forms */}
+                  {formData.paymentMethod === 'stripe' && showStripeForm && clientSecret ? (
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <StripePaymentForm
+                        amount={lesson.price}
+                        lesson={lesson}
+                        formData={formData}
+                        onSuccess={handleStripeSuccess}
+                        onError={handleStripeError}
+                      />
+                    </Elements>
+                  ) : formData.paymentMethod !== 'stripe' ? (
+                    <form onSubmit={handleOtherPaymentSubmit}>
+                      <Button
+                        type="submit"
+                        disabled={isLoading || alreadyBooked}
+                        className="w-full h-12 text-lg"
+                        size="lg"
+                      >
+                        {alreadyBooked ? (
+                          <>
+                            <CheckCircle2 className="h-5 w-5 mr-2" />
+                            Already Enrolled
+                          </>
+                        ) : isLoading ? (
+                          <>
+                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          `Confirm Payment - $${lesson.price}`
+                        )}
+                      </Button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      <span className="ml-2">Initializing payment...</span>
+                    </div>
+                  )}
 
                   {alreadyBooked && (
                     <p className="text-center text-sm text-muted-foreground">
                       You are already enrolled in this course. Visit your dashboard to continue learning.
                     </p>
                   )}
-                </form>
+                </div>
               </CardContent>
               <CardFooter>
                 <div className="w-full text-center">
@@ -395,5 +571,12 @@ export default function CheckoutPage({ params }) {
         </div>
       </div>
     </div>
+  )
+}
+
+// Main Export with Stripe Provider
+export default function CheckoutPage({ params }) {
+  return (
+    <CheckoutContent params={params} />
   )
 }
