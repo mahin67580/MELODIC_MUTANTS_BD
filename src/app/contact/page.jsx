@@ -1,14 +1,15 @@
 'use client';
 
+import MapComponent from '@/components/Map/MapComponent';
 import { useState } from 'react';
-import { 
-  FaPhone, 
-  FaEnvelope, 
-  FaMapMarkerAlt, 
-  FaClock, 
-  FaFacebook, 
-  FaTwitter, 
-  FaInstagram, 
+import {
+  FaPhone,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaClock,
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
   FaYoutube,
   FaPaperPlane
 } from 'react-icons/fa';
@@ -33,10 +34,10 @@ const ContactPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Show success message with SweetAlert
     Swal.fire({
       title: 'Message Sent!',
@@ -49,7 +50,7 @@ const ContactPage = () => {
         confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg'
       }
     });
-    
+
     // Reset form
     setFormData({
       name: '',
@@ -57,9 +58,15 @@ const ContactPage = () => {
       subject: '',
       message: ''
     });
-    
+
     setIsSubmitting(false);
   };
+
+  const center = {
+    lat: 23.4717939464034, // Dhaka
+    lng: 91.16530308420485,
+  };
+//23.4717939464034, 91.16530308420485
 
   return (
     <div className="min-h-screen  ">
@@ -80,7 +87,7 @@ const ContactPage = () => {
             {/* Contact Information */}
             <div className="lg:w-2/5">
               <h2 className="text-3xl font-bold mb-8">Contact Information</h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="bg-indigo-100 p-3 rounded-full mr-4">
@@ -237,7 +244,7 @@ const ContactPage = () => {
       <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
-          
+
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-semibold text-lg mb-2">How do I sign up for lessons?</h3>
@@ -272,17 +279,14 @@ const ContactPage = () => {
 
       {/* Map Section */}
       <section className="py-16 px-4">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto ">
           <h2 className="text-3xl font-bold mb-8 text-center">Find Our Studio</h2>
-          <div className="bg-gray-200 h-96 rounded-lg shadow-md flex items-center justify-center">
-            <div className="text-center">
-              <FaMapMarkerAlt className="text-4xl text-indigo-600 mx-auto mb-4" />
-              <p className="text-gray-600">Interactive map would be displayed here</p>
-              <p className="text-sm text-gray-500 mt-2">123 Music Avenue, New York, NY 10001</p>
-            </div>
+          <div className=" ">
+              <MapComponent markerPosition={center} />
           </div>
         </div>
       </section>
+    
     </div>
   );
 };
