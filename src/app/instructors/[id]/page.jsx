@@ -147,7 +147,7 @@ export default async function InstructorDetailPage({ params }) {
                                             <div
                                                 key={index}
                                                 className="p-4 rounded-2xl shadow bg-white border text-center 
-                   transition transform hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r from-primary/10 to-primary/5"
+                                                                 transition transform hover:scale-105 hover:shadow-xl hover:bg-gradient-to-r from-primary/10 to-primary/5"
                                             >
                                                 <p className="text-sm text-gray-700">{achievement.trim()}</p>
                                             </div>

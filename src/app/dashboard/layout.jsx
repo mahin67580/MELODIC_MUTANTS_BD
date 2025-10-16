@@ -5,11 +5,11 @@ import { BarChart3 } from 'lucide-react'
 import Link from 'next/link'
 import { getServerSession } from "next-auth"
 import { authOptions } from '@/lib/authOptions'
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarHeader, 
-  SidebarProvider 
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarProvider
 } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -28,7 +28,11 @@ export default async function Layout({ children }) {
             <Link href="/">
               <div className="flex items-center text-2xl text-blue-600 hover:text-blue-700 transition-colors">
                 <BarChart3 className="mr-2" size={24} />
-                <span className="font-semibold">Dashboard</span>
+
+                <span className="font-semibold">
+                  {role === "admin" ? "Admin Dashboard" : "Dashboard"}
+                </span>
+
               </div>
             </Link>
           </SidebarHeader>
@@ -53,21 +57,25 @@ export default async function Layout({ children }) {
                     <Link href="/">
                       <div className="flex items-center text-2xl text-blue-600 mb-8">
                         <BarChart3 className="mr-2" size={24} />
-                        <span className="font-semibold">Dashboard</span>
+                        <span className="font-semibold">
+                          {role === "admin" ? "Admin Dashboard" : "Dashboard"}
+                        </span>
                       </div>
                     </Link>
                     {role === "admin" ? <Adminnav /> : <Dashnav />}
                   </div>
                 </SheetContent>
               </Sheet>
-              
+
               <Link href="/">
                 <div className="flex items-center text-xl text-blue-600 lg:hidden">
                   <BarChart3 className="mr-2" size={20} />
-                  <span className="font-semibold">Dashboard</span>
+                  <span className="font-semibold">
+                    {role === "admin" ? "Admin Dashboard" : "Dashboard"}
+                  </span>
                 </div>
               </Link>
-              
+
               <div className="w-9"></div> {/* Spacer for balance */}
             </div>
           </header>

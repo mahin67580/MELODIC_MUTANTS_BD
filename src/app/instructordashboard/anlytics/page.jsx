@@ -33,6 +33,10 @@ import {
   Calendar,
   MessageSquare,
   Award,
+  Video,
+  Download,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -47,12 +51,17 @@ export default function InstructorAnalyticsPage() {
     averageRating: 0,
     totalStudents: 0,
     totalReviews: 0,
+    totalVideos: 0,
+    totalResources: 0,
+    totalMilestones: 0,
+    totalModules: 0,
   });
   const [coursePerformance, setCoursePerformance] = useState([]);
   const [enrollmentData, setEnrollmentData] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [ratingDistribution, setRatingDistribution] = useState([]);
-  const [recentEnrollments, setRecentEnrollments] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [courseDetails, setCourseDetails] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,92 +73,141 @@ export default function InstructorAnalyticsPage() {
   const fetchInstructorAnalytics = async () => {
     try {
       setLoading(true);
-      
-      // Fetch instructor's courses
+
+      // Fetch all courses
       const coursesRes = await fetch("/api/courses");
       const coursesData = await coursesRes.json();
-      
+
       // Filter courses for current instructor
       const instructorCourses = coursesData.data?.filter(
         course => course.email === session.user.email
       ) || [];
 
-      // Fetch bookings to get enrollment data
-      const bookingsRes = await fetch("/api/bookings");
-      const bookingsData = await bookingsRes.json();
+      console.log("Instructor courses:", instructorCourses);
 
-      // Calculate instructor-specific statistics
+      // Calculate comprehensive statistics
       const totalCourses = instructorCourses.length;
-      
-      const totalEnrollments = instructorCourses.reduce((sum, course) => 
+
+      const totalEnrollments = instructorCourses.reduce((sum, course) =>
         sum + (course.enrolledStudents || 0), 0
       );
 
-      // Calculate revenue from instructor's courses
-      const totalRevenue = instructorCourses.reduce((sum, course) => {
-        const courseBookings = bookingsData.data?.filter(
-          booking => booking.id === course._id.toString()
-        ) || [];
-        return sum + courseBookings.reduce((courseSum, booking) => 
-          courseSum + (booking.price || 0), 0
-        );
-      }, 0);
+      // Calculate potential revenue (price × enrollments)
+      const totalRevenue = instructorCourses.reduce((sum, course) =>
+        sum + ((course.price || 0) * (course.enrolledStudents || 0)), 0
+      );
 
-      // Calculate average rating
+      // Calculate average rating and collect all ratings
       const allRatings = instructorCourses.flatMap(course => course.ratings || []);
-      const averageRating = allRatings.length > 0 
+      const averageRating = allRatings.length > 0
         ? allRatings.reduce((sum, rating) => sum + (rating.rating || 0), 0) / allRatings.length
         : 0;
 
-      // Get unique students count
-      const instructorBookings = bookingsData.data?.filter(booking => 
-        instructorCourses.some(course => course._id.toString() === booking.id)
-      ) || [];
-      const uniqueStudents = new Set(instructorBookings.map(booking => booking.email)).size;
+      // Calculate content metrics
+      const totalVideos = instructorCourses.reduce((sum, course) => {
+        const courseVideos = course.milestones?.reduce((milestoneSum, milestone) =>
+          milestoneSum + (milestone.modules?.length || 0), 0
+        ) || 0;
+        return sum + courseVideos;
+      }, 0);
+
+      const totalResources = instructorCourses.reduce((sum, course) =>
+        sum + (course.resources?.downloadables?.length || 0), 0
+      );
+
+      const totalMilestones = instructorCourses.reduce((sum, course) =>
+        sum + (course.milestones?.length || 0), 0
+      );
+
+      const totalModules = instructorCourses.reduce((sum, course) => {
+        const courseModules = course.milestones?.reduce((moduleSum, milestone) =>
+          moduleSum + (milestone.modules?.length || 0), 0
+        ) || 0;
+        return sum + courseModules;
+      }, 0);
 
       // Course performance data
-      const coursePerformanceData = instructorCourses.map(course => ({
-        name: course.title.length > 15 ? course.title.substring(0, 15) + "..." : course.title,
-        enrollments: course.enrolledStudents || 0,
-        revenue: (course.enrolledStudents || 0) * (course.price || 0),
-        rating: course.ratings?.length > 0 
+      const coursePerformanceData = instructorCourses.map(course => {
+        const courseRating = course.ratings?.length > 0
           ? course.ratings.reduce((sum, r) => sum + (r.rating || 0), 0) / course.ratings.length
-          : 0,
-      })).sort((a, b) => b.enrollments - a.enrollments);
+          : 0;
 
-      // Enrollment trend data (mock for now)
+        const courseVideos = course.milestones?.reduce((sum, milestone) =>
+          sum + (milestone.modules?.length || 0), 0
+        ) || 0;
+
+        return {
+          name: course.title.length > 15 ? course.title.substring(0, 15) + "..." : course.title,
+          fullName: course.title,
+          enrollments: course.enrolledStudents || 0,
+          revenue: (course.enrolledStudents || 0) * (course.price || 0),
+          rating: courseRating,
+          videos: courseVideos,
+          price: course.price || 0,
+          level: course.level,
+          instrument: course.instrument,
+        };
+      }).sort((a, b) => b.enrollments - a.enrollments);
+
+      // Enrollment trend data based on course creation dates
       const enrollmentTrend = generateEnrollmentTrend(instructorCourses);
 
-      // Revenue data (mock for now)
-      const monthlyRevenue = generateMonthlyRevenue(instructorBookings);
+      // Revenue data based on course performance
+      const monthlyRevenue = generateMonthlyRevenue(instructorCourses);
 
       // Rating distribution
       const ratingDist = calculateRatingDistribution(allRatings);
 
-      // Recent enrollments
-      const recentEnrollmentsData = instructorBookings
-        .slice(0, 6)
-        .map(booking => ({
-          studentName: booking.name,
-          courseName: booking.lessonTitle,
-          date: booking._id ? new Date(parseInt(booking._id.toString().substring(0, 8), 16) * 1000) : new Date(),
-          amount: booking.price,
-        }));
+      // Recent activity (course updates, new ratings, etc.)
+      const recentActivityData = generateRecentActivity(instructorCourses);
+
+      // Detailed course information for the summary card
+      const courseDetailsData = instructorCourses.map(course => {
+        const courseRating = course.ratings?.length > 0
+          ? course.ratings.reduce((sum, r) => sum + (r.rating || 0), 0) / course.ratings.length
+          : 0;
+
+        const totalVideos = course.milestones?.reduce((sum, milestone) =>
+          sum + (milestone.modules?.length || 0), 0
+        ) || 0;
+
+        const totalResources = course.resources?.downloadables?.length || 0;
+
+        return {
+          id: course._id,
+          title: course.title,
+          rating: courseRating,
+          enrollments: course.enrolledStudents || 0,
+          price: course.price || 0,
+          level: course.level,
+          instrument: course.instrument,
+          videos: totalVideos,
+          resources: totalResources,
+          milestones: course.milestones?.length || 0,
+          createdAt: course.createdAt,
+          ratings: course.ratings || [],
+        };
+      });
 
       setStats({
         totalCourses,
         totalEnrollments,
         totalRevenue,
         averageRating: parseFloat(averageRating.toFixed(1)),
-        totalStudents: uniqueStudents,
+        totalStudents: totalEnrollments, // Using enrollments as student count
         totalReviews: allRatings.length,
+        totalVideos,
+        totalResources,
+        totalMilestones,
+        totalModules,
       });
 
       setCoursePerformance(coursePerformanceData);
       setEnrollmentData(enrollmentTrend);
       setRevenueData(monthlyRevenue);
       setRatingDistribution(ratingDist);
-      setRecentEnrollments(recentEnrollmentsData);
+      setRecentActivity(recentActivityData);
+      setCourseDetails(courseDetailsData);
 
     } catch (error) {
       console.error("Error fetching instructor analytics:", error);
@@ -158,26 +216,55 @@ export default function InstructorAnalyticsPage() {
     }
   };
 
-  // Mock data generators
+  // Generate enrollment trend based on course creation months
   const generateEnrollmentTrend = (courses) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return months.map(month => ({
-      month,
-      enrollments: Math.floor(Math.random() * 20) + 5,
-    }));
+    
+    return months.map(month => {
+      const monthCourses = courses.filter(course => {
+        if (!course.createdAt) return false;
+        const courseDate = new Date(course.createdAt);
+        return courseDate.toLocaleString('default', { month: 'short' }) === month;
+      });
+      
+      const enrollments = monthCourses.reduce((sum, course) => 
+        sum + (course.enrolledStudents || 0), 0
+      );
+      
+      return {
+        month,
+        enrollments,
+        courses: monthCourses.length,
+      };
+    });
   };
 
-  const generateMonthlyRevenue = (bookings) => {
+  // Generate revenue data based on course performance
+  const generateMonthlyRevenue = (courses) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return months.map(month => ({
-      month,
-      revenue: Math.floor(Math.random() * 5000) + 1000,
-    }));
+    
+    return months.map(month => {
+      const monthCourses = courses.filter(course => {
+        if (!course.createdAt) return false;
+        const courseDate = new Date(course.createdAt);
+        return courseDate.toLocaleString('default', { month: 'short' }) === month;
+      });
+      
+      const revenue = monthCourses.reduce((sum, course) => 
+        sum + ((course.price || 0) * (course.enrolledStudents || 0)), 0
+      );
+      
+      return {
+        month,
+        revenue,
+      };
+    });
   };
 
+  // Calculate rating distribution
   const calculateRatingDistribution = (ratings) => {
     const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    
+
     ratings.forEach(rating => {
       const stars = Math.round(rating.rating);
       if (distribution[stars] !== undefined) {
@@ -190,6 +277,40 @@ export default function InstructorAnalyticsPage() {
       value: count,
       stars: parseInt(stars),
     }));
+  };
+
+  // Generate recent activity from course data
+  const generateRecentActivity = (courses) => {
+    const activities = [];
+    
+    courses.forEach(course => {
+      // Add course creation activity
+      activities.push({
+        type: 'course_created',
+        title: `Created course: ${course.title}`,
+        date: new Date(course.createdAt),
+        courseName: course.title,
+      });
+
+      // Add rating activities
+      if (course.ratings) {
+        course.ratings.forEach(rating => {
+          activities.push({
+            type: 'new_rating',
+            title: `New ${rating.rating}★ rating for ${course.title}`,
+            date: new Date(rating.createdAt),
+            courseName: course.title,
+            rating: rating.rating,
+            review: rating.review,
+          });
+        });
+      }
+    });
+
+    // Sort by date and return latest 6
+    return activities
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 6);
   };
 
   const StatCard = ({ title, value, icon: Icon, description, trend }) => (
@@ -213,22 +334,21 @@ export default function InstructorAnalyticsPage() {
   const RatingStars = ({ rating }) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     return (
       <div className="flex items-center space-x-1">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${
-              i < fullStars
-                ? 'text-yellow-400 fill-yellow-400'
-                : i === fullStars && hasHalfStar
+            className={`h-4 w-4 ${i < fullStars
+              ? 'text-yellow-400 fill-yellow-400'
+              : i === fullStars && hasHalfStar
                 ? 'text-yellow-400 fill-yellow-400'
                 : 'text-gray-300'
-            }`}
+              }`}
           />
         ))}
-        <span className="text-sm text-muted-foreground ml-1">({rating})</span>
+        <span className="text-sm text-muted-foreground ml-1">({rating.toFixed(1)})</span>
       </div>
     );
   };
@@ -250,8 +370,8 @@ export default function InstructorAnalyticsPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Comprehensive Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Courses"
           value={stats.totalCourses}
@@ -263,37 +383,51 @@ export default function InstructorAnalyticsPage() {
           title="Total Enrollments"
           value={stats.totalEnrollments}
           icon={Users}
-          description="Student enrollments"
+          description="Student enrollments across all courses"
           trend={15}
         />
-        {/* <StatCard
-          title="Total Students"
-          value={stats.totalStudents}
-          icon={Users}
-          description="Unique students"
-          trend={12}
-        /> */}
-        {/* <StatCard
-          title="Total Revenue"
+        <StatCard
+          title="Potential Revenue"
           value={`$${stats.totalRevenue}`}
           icon={DollarSign}
-          description="Earnings from courses"
+          description="Based on enrollments and pricing"
           trend={20}
-        /> */}
+        />
         <StatCard
           title="Average Rating"
           value={stats.averageRating}
           icon={Star}
-          description="Course ratings average"
+          description="Across all courses and reviews"
           trend={5}
         />
-        {/* <StatCard
+        <StatCard
           title="Total Reviews"
           value={stats.totalReviews}
           icon={MessageSquare}
           description="Student reviews received"
           trend={10}
-        /> */}
+        />
+        <StatCard
+          title="Total Videos"
+          value={stats.totalVideos}
+          icon={Video}
+          description="Teaching videos uploaded"
+          trend={25}
+        />
+        <StatCard
+          title="Total Resources"
+          value={stats.totalResources}
+          icon={Download}
+          description="Downloadable materials"
+          trend={12}
+        />
+        <StatCard
+          title="Course Modules"
+          value={stats.totalModules}
+          icon={BarChart3}
+          description="Learning modules created"
+          trend={18}
+        />
       </div>
 
       {/* Charts Grid */}
@@ -303,7 +437,7 @@ export default function InstructorAnalyticsPage() {
           <CardHeader>
             <CardTitle>Course Performance</CardTitle>
             <CardDescription>
-              Your courses ranked by student enrollments
+              Your courses ranked by student enrollments and revenue potential
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -311,11 +445,18 @@ export default function InstructorAnalyticsPage() {
               <BarChart data={coursePerformance}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip 
+                  formatter={(value, name) => {
+                    if (name === 'revenue') return [`$${value}`, 'Revenue'];
+                    if (name === 'enrollments') return [value, 'Enrollments'];
+                    return [value, name];
+                  }}
+                />
                 <Legend />
-                <Bar dataKey="enrollments" fill="#8884d8" name="Enrollments" />
-                <Bar dataKey="revenue" fill="#00C49F" name="Revenue ($)" />
+                <Bar yAxisId="left" dataKey="enrollments" fill="#8884d8" name="Enrollments" />
+                <Bar yAxisId="right" dataKey="revenue" fill="#00C49F" name="Revenue ($)" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -325,7 +466,7 @@ export default function InstructorAnalyticsPage() {
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
             <CardTitle>Rating Distribution</CardTitle>
-            <CardDescription>Student feedback breakdown</CardDescription>
+            <CardDescription>Student feedback breakdown across all courses</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -354,7 +495,7 @@ export default function InstructorAnalyticsPage() {
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Enrollment Trends</CardTitle>
-            <CardDescription>Monthly student enrollment patterns</CardDescription>
+            <CardDescription>Monthly student enrollment patterns based on course creation</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -364,12 +505,19 @@ export default function InstructorAnalyticsPage() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="enrollments" 
-                  stroke="#8884d8" 
+                <Line
+                  type="monotone"
+                  dataKey="enrollments"
+                  stroke="#8884d8"
                   strokeWidth={2}
                   name="Enrollments"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="courses"
+                  stroke="#00C49F"
+                  strokeWidth={2}
+                  name="Courses Created"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -379,8 +527,8 @@ export default function InstructorAnalyticsPage() {
         {/* Revenue Trends */}
         <Card className="col-span-4 lg:col-span-3">
           <CardHeader>
-            <CardTitle>Revenue Trends</CardTitle>
-            <CardDescription>Monthly earnings overview</CardDescription>
+            <CardTitle>Revenue Potential</CardTitle>
+            <CardDescription>Monthly earnings potential based on course performance</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -390,10 +538,10 @@ export default function InstructorAnalyticsPage() {
                 <YAxis />
                 <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#00C49F" 
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#00C49F"
                   strokeWidth={2}
                   name="Revenue ($)"
                 />
@@ -403,60 +551,93 @@ export default function InstructorAnalyticsPage() {
         </Card>
       </div>
 
-      {/* Recent Enrollments & Course Details */}
+      {/* Recent Activity & Course Details */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Recent Enrollments */}
+        {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Enrollments</CardTitle>
-            <CardDescription>Latest student registrations</CardDescription>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest course updates and student interactions</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentEnrollments.length > 0 ? (
-                recentEnrollments.map((enrollment, index) => (
-                  <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{enrollment.studentName}</p>
-                      <p className="text-sm text-muted-foreground">{enrollment.courseName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {enrollment.date.toLocaleDateString()}
-                      </p>
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-start space-x-3 border-b pb-3 last:border-0 last:pb-0">
+                    <div className={`p-2 rounded-full ${
+                      activity.type === 'course_created' ? 'bg-blue-100 text-blue-600' : 'bg-yellow-100 text-yellow-600'
+                    }`}>
+                      {activity.type === 'course_created' ? <BookOpen className="h-4 w-4" /> : <Star className="h-4 w-4" />}
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">${enrollment.amount}</p>
-                      <p className="text-xs text-muted-foreground">Enrolled</p>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium">{activity.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.date.toLocaleDateString()} at {activity.date.toLocaleTimeString()}
+                      </p>
+                      {activity.review && (
+                        <p className="text-xs text-muted-foreground italic">"{activity.review}"</p>
+                      )}
                     </div>
                   </div>
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent enrollments
+                  No recent activity
                 </p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Course Ratings Summary */}
+        {/* Course Details Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Course Ratings Summary</CardTitle>
-            <CardDescription>Detailed course performance</CardDescription>
+            <CardTitle>Course Details Summary</CardTitle>
+            <CardDescription>Comprehensive overview of all your courses</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {coursePerformance.length > 0 ? (
-                coursePerformance.map((course, index) => (
-                  <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                    <div className="space-y-1 flex-1">
-                      <p className="text-sm font-medium">{course.name}</p>
-                      <div className="flex items-center justify-between">
-                        <RatingStars rating={course.rating} />
-                        <span className="text-sm text-muted-foreground">
-                          {course.enrollments} enrollments
-                        </span>
+              {courseDetails.length > 0 ? (
+                courseDetails.map((course, index) => (
+                  <div key={course.id} className="border-b pb-4 last:border-0 last:pb-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-sm">{course.title}</h4>
+                      <span className="text-sm font-medium">${course.price}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <RatingStars rating={course.rating} />
+                      <span className="text-sm text-muted-foreground">
+                        {course.enrollments} enrollments
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center space-x-1">
+                        <Video className="h-3 w-3" />
+                        <span>{course.videos} videos</span>
                       </div>
+                      <div className="flex items-center space-x-1">
+                        <Download className="h-3 w-3" />
+                        <span>{course.resources} resources</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <BarChart3 className="h-3 w-3" />
+                        <span>{course.milestones} milestones</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="h-3 w-3" />
+                        <span>{new Date(course.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 mt-2">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                        {course.instrument}
+                      </span>
+                      <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                        {course.level}
+                      </span>
                     </div>
                   </div>
                 ))
@@ -469,48 +650,6 @@ export default function InstructorAnalyticsPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Manage your teaching content</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="/dashboard/instructordashboard/addcourse"
-              className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-accent transition-colors"
-            >
-              <BookOpen className="h-6 w-6 text-blue-500" />
-              <div>
-                <p className="font-medium">Create New Course</p>
-                <p className="text-sm text-muted-foreground">Publish a new course</p>
-              </div>
-            </a>
-            <a
-              href="/dashboard/instructordashboard/managecourse"
-              className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-accent transition-colors"
-            >
-              <TrendingUp className="h-6 w-6 text-green-500" />
-              <div>
-                <p className="font-medium">Manage Courses</p>
-                <p className="text-sm text-muted-foreground">Edit existing courses</p>
-              </div>
-            </a>
-            <a
-              href="/dashboard/instructordashboard/updatebio"
-              className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-accent transition-colors"
-            >
-              <Award className="h-6 w-6 text-purple-500" />
-              <div>
-                <p className="font-medium">Update Profile</p>
-                <p className="text-sm text-muted-foreground">Edit instructor bio</p>
-              </div>
-            </a>
-          </div>
-        </CardContent>
-      </Card> */}
     </div>
   );
 }

@@ -8,7 +8,8 @@ import {
   PlusCircle, 
   Settings, 
   Users,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -66,6 +67,23 @@ export default function Adminnav() {
           </Button>
         )
       })}
+
+       <div className='  pl-3  pt2  '>
+        <button>
+          <Link href='/'>
+            <div className="flex items-center gap-3 text-red-600">
+              <BookOpen className="h-4 w-4 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium text-sm">Home</div>
+                <div className="text-xs text-muted-foreground">Back to home page</div>
+              </div>
+            </div>
+          </Link>
+        </button>
+      </div>
+
+
+      
     </nav>
   )
 }

@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { 
-  BarChart3, 
-  PlusCircle, 
-  Settings, 
+import {
+  BarChart3,
+  PlusCircle,
+  Settings,
   User,
   BookOpen,
   ChevronRight
@@ -45,20 +45,20 @@ export default function Instructornav() {
       icon: User,
       description: 'Edit your bio and info'
     },
-    {
-      href: '/instructordashboard/mycourses',
-      label: 'My Courses',
-      icon: BookOpen,
-      description: 'View all your courses'
-    }
+    // {
+    //   href: '/',
+    //   label: 'Home',
+    //   icon: BookOpen,
+    //   description: 'Back to home page'
+    // }
   ]
 
   return (
-    <nav className="space-y-2">
+    <nav className="space-y-2   ">
       {navItems.map((item) => {
         const Icon = item.icon
         const active = isActive(item.href)
-        
+
         return (
           <Button
             key={item.href}
@@ -82,6 +82,20 @@ export default function Instructornav() {
           </Button>
         )
       })}
+      <div className='  p-4   '>
+        <button>
+          <Link href='/'>
+            <div className="flex items-center gap-3 text-red-600">
+              <BookOpen className="h-4 w-4 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium text-sm">Home</div>
+                <div className="text-xs text-muted-foreground">Back to home page</div>
+              </div>
+            </div>
+          </Link>
+        </button>
+      </div>
+
     </nav>
   )
 }
