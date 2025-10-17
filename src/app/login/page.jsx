@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { Spinner } from "@/components/ui/spinner"
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react"
- 
+
 export default function Login() {
     const [formData, setFormData] = useState({
         email: '',
@@ -71,7 +71,7 @@ export default function Login() {
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
-        
+
         // Clear error when user starts typing
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' })
@@ -84,7 +84,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        
+
         // Validate form before submission
         if (!validateForm()) {
             await Swal.fire({
@@ -109,7 +109,7 @@ export default function Login() {
             if (result?.error) {
                 // Specific error handling based on error message
                 let errorMessage = 'Invalid email or password. Please try again.'
-                
+
                 if (result.error.includes('user') || result.error.includes('email')) {
                     errorMessage = 'No account found with this email address.'
                 } else if (result.error.includes('password')) {
@@ -162,6 +162,68 @@ export default function Login() {
             setIsLoading(false)
         }
     }
+    //backup of previous handleSocialLogin
+    // const handleSocialLogin = async (provider) => {
+    //     setSocialLoading(true)
+
+    //     Swal.fire({
+    //         title: 'Connecting...',
+    //         text: 'Please wait while we connect to your account',
+    //         icon: 'info',
+    //         showConfirmButton: false,
+    //         allowOutsideClick: false,
+    //         didOpen: () => {
+    //             Swal.showLoading()
+    //         }
+    //     })
+
+    //     try {
+    //         const result = await signIn(provider, {
+    //             callbackUrl: '/',
+    //             redirect: false
+    //         })
+
+    //         if (result?.error) {
+    //             Swal.close()
+    //             await Swal.fire({
+    //                 title: 'Login Failed',
+    //                 text: result.error || 'Failed to login with Google. Please try again.',
+    //                 icon: 'error',
+    //                 confirmButtonText: 'Try Again',
+    //                 confirmButtonColor: '#3085d6',
+    //             })
+    //         } else {
+    //             Swal.close()
+    //             await Swal.fire({
+    //                 title: 'Success!',
+    //                 text: 'You have successfully logged in with Google.',
+    //                 icon: 'success',
+    //                 confirmButtonText: 'Continue',
+    //                 confirmButtonColor: '#000000',
+    //                 background: '#ffffff',
+    //                 color: '#000000',
+    //                 timer: 1500,
+    //                 timerProgressBar: true,
+    //                 customClass: {
+    //                     popup: 'rounded-xl shadow-lg',
+    //                 },
+    //             })
+    //         }
+
+    //     } catch (error) {
+    //         console.error("Social login error:", error)
+    //         Swal.close()
+    //         await Swal.fire({
+    //             title: 'Error!',
+    //             text: 'An unexpected error occurred during social login. Please try again.',
+    //             icon: 'error',
+    //             confirmButtonText: 'OK',
+    //             confirmButtonColor: '#3085d6',
+    //         })
+    //     } finally {
+    //         setSocialLoading(false)
+    //     }
+    // }
 
     const handleSocialLogin = async (provider) => {
         setSocialLoading(true)
@@ -176,39 +238,25 @@ export default function Login() {
                 Swal.showLoading()
             }
         })
- 
-        try {               
+
+        try {
             const result = await signIn(provider, {
-                callbackUrl: '/',
-                redirect: false
+                callbackUrl: '/?socialLoginSuccess=true',
+                redirect: true // Changed to true to allow redirect
             })
 
+            // This code only runs if there's an error (since redirect: true)
             if (result?.error) {
                 Swal.close()
                 await Swal.fire({
                     title: 'Login Failed',
-                    text: result.error || 'Failed to login with Google. Please try again.',
+                    text: result.error || `Failed to login with ${provider}. Please try again.`,
                     icon: 'error',
                     confirmButtonText: 'Try Again',
                     confirmButtonColor: '#3085d6',
                 })
-            } else {
-                Swal.close()
-                await Swal.fire({
-                    title: 'Success!',
-                    text: 'You have successfully logged in with Google.',
-                    icon: 'success',
-                    confirmButtonText: 'Continue',
-                    confirmButtonColor: '#000000',
-                    background: '#ffffff',
-                    color: '#000000',
-                    timer: 1500,
-                    timerProgressBar: true,
-                    customClass: {
-                        popup: 'rounded-xl shadow-lg',
-                    },
-                })
             }
+            // Success case is handled by redirect to home page with parameter
 
         } catch (error) {
             console.error("Social login error:", error)
@@ -231,7 +279,7 @@ export default function Login() {
             <div
                 className="min-h-screen flex items-center justify-center relative"
                 style={{
-                    backgroundImage:  "url('/bgimg.jpg')",
+                    backgroundImage: "url('/bgimg.jpg')",
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundAttachment: 'fixed',
@@ -254,7 +302,7 @@ export default function Login() {
             <div
                 className="min-h-screen flex items-center justify-center relative"
                 style={{
-                    backgroundImage:  "url('/bgimg.jpg')",
+                    backgroundImage: "url('/bgimg.jpg')",
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundAttachment: 'fixed',
@@ -275,7 +323,7 @@ export default function Login() {
         <div
             className="min-h-screen flex items-center justify-center p-4 relative"
             style={{
-                backgroundImage:  "url('/bgimg.jpg')",
+                backgroundImage: "url('/bgimg.jpg')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundAttachment: 'fixed',

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Guitar, Piano, Drum, Users, BookOpen, Trophy } from 'lucide-react';
+import Link from 'next/link';
 
 // Use regular components instead of shadcn/ui typography if not available
 const Heading = ({ level = 1, children, className = '', ...props }) => {
@@ -99,8 +100,8 @@ const Hero = ({ className = '' }) => {
           {/* Content Section */}
           <div className={`space-y-6 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}>
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className=" px-4 py-2 bg-white/20 text-white border-white/30 backdrop-blur-sm"
             >
               🎵 Start Your Musical Journey Today
@@ -129,17 +130,20 @@ const Hero = ({ className = '' }) => {
                 onClick={scrollToCourses}
                 aria-label="Start learning for free"
               >
-                Start Learning Free
+                Start Learning
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-white text-white bg-black  hover:bg-white hover:text-black px-8 py-3 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm"
-                onClick={scrollToCourses}
-                aria-label="Browse available courses"
-              >
-                Browse Courses
-              </Button>
+              <Link href="/allcourses">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white text-white bg-black  hover:bg-white hover:text-black px-8 py-3 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm"
+
+                  aria-label="Browse available courses"
+                >
+                  Browse Courses
+                </Button>
+              </Link>
+
             </div>
 
             {/* Statistics */}
@@ -159,7 +163,7 @@ const Hero = ({ className = '' }) => {
             </div>
           </div>
 
-     
+
 
           <div className={`transition-all duration-700 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 '
             }`}>
@@ -213,15 +217,15 @@ const Hero = ({ className = '' }) => {
         </div>
       </div>
 
-        {/* Wave divider at bottom */}
+      {/* Wave divider at bottom */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden">
-        <svg 
-          viewBox="0 0 1200 120" 
-          preserveAspectRatio="none" 
+        <svg
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
           className="relative block w-full h-16"
         >
-          <path 
-            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V56.44Z" 
+          <path
+            d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V56.44Z"
             className="fill-white"
           ></path>
         </svg>
