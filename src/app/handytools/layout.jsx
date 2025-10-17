@@ -78,13 +78,13 @@ export default function ToolsLayout({ children }) {
     <div className="flex min-h-screen bg-background relative">
       {/* Mobile Header */}
       {isMobile && (
-        <div className="fixed top-20  border-2 shadow-2xl right-0 z-50 bg-card border-b h-14 flex items-center justify-end px-2">
+        <div className="fixed top-20 border-3   shadow-2xl right-0 z-50 bg-card   rounded-l-4xl  flex items-center justify-end p-2 ">
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-md text-card-foreground hover:bg-accent hover:text-accent-foreground  "
+            className="p-2 rounded-md      "
             aria-label="Toggle menu"
           >
-            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isSidebarOpen ? <X className="w-5 h-5" /> : <Music className="w-5 h-5" />}
           </button>
           {/* <h1 className="ml-3 text-xl font-bold text-card-foreground  ">Music Tools</h1> */}
         </div>

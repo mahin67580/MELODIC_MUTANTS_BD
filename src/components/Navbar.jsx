@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
 // Icons
-import { Menu, User, LogOut, Home, Users, BookOpen, Mail, Info, Wrench  } from 'lucide-react'
+import { Menu, User, LogOut, Home, Users, BookOpen, Mail, Info, Wrench } from 'lucide-react'
 
 export default function Navbar() {
     const { data: session, status } = useSession()
@@ -77,8 +77,11 @@ export default function Navbar() {
             return mobile ? (
                 <Button
                     key={item.href}
-                    variant="ghost"
-                    className="w-full justify-start"
+                    variant={isActive(item.href) ? "default" : "ghost"}
+                    className={cn(
+                        "w-40 justify-start",
+                        isActive(item.href) && " "
+                    )}
                     asChild
                 >
                     <Link href={item.href} onClick={onLinkClick}>
@@ -116,7 +119,7 @@ export default function Navbar() {
         <nav className="sticky  top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="  flex h-16 items-center justify-between px-4 ">
                 {/* Mobile menu */}
-                <div className="flex items-center gap-4 md:hidden">
+                <div className="flex items-center gap-4 md:hidden   ">
                     <Sheet>
                         <SheetTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -127,7 +130,7 @@ export default function Navbar() {
                             <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                             <div className="flex flex-col gap-4 py-4">
 
-                                <nav className="flex flex-col gap-2">
+                                <nav className="flex flex-col gap-2 pl-5 space-y-3 ">
                                     <NavLinks mobile={true} />
                                 </nav>
                             </div>

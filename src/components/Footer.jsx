@@ -2,13 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Youtube, 
-  Mail, 
-  Phone, 
+import {
+  Facebook,
+  Youtube,
+  Mail,
+  Phone,
   Music,
   MapPin,
   Clock
@@ -31,27 +29,39 @@ export default function Footer() {
               <h2 className="text-2xl  ">𝕸𝖊𝖑𝖔𝖉𝖎𝖈 𝕸𝖚𝖙𝖆𝖓𝖙𝖘</h2>
             </div>
             <p className="text-muted-foreground max-w-md">
-              Transforming music education with expert instructors and innovative technology. 
+              Transforming music education with expert instructors and innovative technology.
               Learn anytime, anywhere with our comprehensive online courses.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-2">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>support@melodicmutant.com</span>
+                <a
+                  href="mailto:afjalhossainmahin0@gmail.com"
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  afjalhossainmahin0@gmail.com
+                </a>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (234) 567-890</span>
+                <a
+                  href="https://wa.me/8801875027270"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors cursor-pointer"
+                >
+                  018750-27270
+                </a>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>123 Music Street, Harmony City</span>
+                <span>Bangladesh Comilla</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>Mon-Fri: 9AM-6PM</span>
+                <span>Sat-Thu: 9AM-6PM</span>
               </div>
             </div>
           </div>
@@ -65,7 +75,7 @@ export default function Footer() {
                 {[
                   { href: "/", label: "Home" },
                   { href: "/about", label: "About Us" },
-                  { href: "/courses", label: "Courses" },
+                  { href: "/allcourses", label: "Courses" },
                   { href: "/instructors", label: "Instructors" },
                   { href: "/contact", label: "Contact" }
                 ].map((link) => (
@@ -127,7 +137,7 @@ export default function Footer() {
         </div>
 
         {/* Newsletter Section */}
-       
+
 
         <Separator className="my-6" />
 
@@ -141,14 +151,12 @@ export default function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-2">
             {[
-              { icon: Facebook, href: "#", label: "Facebook" },
-              { icon: Twitter, href: "#", label: "Twitter" },
-              { icon: Instagram, href: "#", label: "Instagram" },
-              { icon: Youtube, href: "#", label: "YouTube" }
+              { icon: Facebook, href: "https://www.facebook.com/afzalh0ssainmahin/", label: "Facebook" },
+              { icon: Youtube, href: "https://www.youtube.com/@afzalhossainmahin", label: "YouTube" }
             ].map((social) => (
               <Button key={social.label} asChild variant="ghost" size="icon">
-                <Link 
-                  href={social.href} 
+                <Link
+                  href={social.href}
                   aria-label={social.label}
                   className="text-muted-foreground hover:text-foreground"
                 >
