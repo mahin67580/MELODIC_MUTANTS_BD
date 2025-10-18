@@ -7,7 +7,36 @@ A comprehensive full-stack music education platform built with Next.js that conn
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.19.0-green?style=for-the-badge&logo=mongodb)
 
 ## 🚀 Live Demo
-[https://melodic-mutants-bd.vercel.app/](#)
+
+🌐 Production Site
+🔗 Live Application: https://melodic-mutants-bd.vercel.app/
+
+🎯 Quick Access & Demo Accounts
+Test User Credentials:
+Student Account:
+
+**Email**: student@demo.com
+
+**Password**: demo123
+
+**Instructor Account**:
+
+**Email**: instructor@demo.com
+
+**Password**: demo123
+
+**Admin Account**:
+
+**Email**: contact at afjalhossainmahin0@gmail.com
+
+**Password**: contact at afjalhossainmahin0@gmail.com
+
+**Featured Demo Content**:
+**Sample Courses**: Guitar Fundamentals, Piano for Beginners, Advanced Music Theory
+
+**Interactive Tools**: Live Chord Finder, Scale Explorer, Metronome
+
+**Payment Testing**: Use Stripe test card 4242 4242 4242 4242
 
 ## 📖 Table of Contents
 - [Features](#features)
