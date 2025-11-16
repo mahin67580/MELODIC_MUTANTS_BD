@@ -14,12 +14,13 @@ import LessonActionButton from "./LessonActionButton";
 
 export default async function Lessons() {
   const lessonCollection = await dbConnect(collectionNamesObj.lessonCollection);
+
   const data = await lessonCollection
     .find({})
     .sort({ enrolledStudents: -1 }) // Sort by enrolledStudents in descending order
     .limit(6) // Get top 6 most enrolled
     .toArray();
-
+ 
   // Compute Average Rating
   const getAverageRating = (ratings) => {
     if (!ratings || ratings.length === 0) return 0;
@@ -63,7 +64,7 @@ export default async function Lessons() {
                 </div>
 
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-xl">{lesson.instrument}</CardTitle>
+                  <CardTitle className="text-xl">{lesson.title}</CardTitle>
                   <CardDescription className="line-clamp-2">
                     {lesson.description || `Learn ${lesson.instrument} with expert guidance`}
                   </CardDescription>
@@ -106,7 +107,7 @@ export default async function Lessons() {
                 </CardContent>
 
                 <CardFooter>
-                    <LessonActionButton lessonId={lesson._id.toString()} />
+                  <LessonActionButton lessonId={lesson._id.toString()} />
                 </CardFooter>
               </Card>
             );
